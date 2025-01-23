@@ -1,4 +1,6 @@
 steps:
+  options:
+    logging: CLOUD_LOGGING_ONLY
   # Step 1: Install dependencies
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
