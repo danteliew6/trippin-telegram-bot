@@ -3,8 +3,8 @@ import json
 import logging
 import gspread
 from dotenv import load_dotenv
-from google.oauth2.service_account import Credentials
 from telegram import Bot
+import google
 
 load_dotenv()
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE", "SERVICE_ACCOUNT_FILE environment variable is not set.")
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
-credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+credentials = google.auth.default(scopes=SCOPES)
 gc = gspread.authorize(credentials)
 
 # Replace with your Google Sheet ID
