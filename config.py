@@ -5,7 +5,8 @@ import gspread
 from dotenv import load_dotenv
 from telegram import Bot
 import google
-
+from googleapiclient.discovery import build
+from google.cloud import firestore
 load_dotenv()
 
 # Set up logging
@@ -14,12 +15,15 @@ logger = logging.getLogger(__name__)
 
 # Google Sheets setup
 SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE", "SERVICE_ACCOUNT_FILE environment variable is not set.")
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
 
 credentials, project_id = google.auth.default(scopes=SCOPES)
 gc = gspread.authorize(credentials)
+drive_service = build('drive', 'v3', credentials=credentials)
+db = firestore.Client(credentials=credentials, project=project_id)
 
 # Replace with your Google Sheet ID
+FOLDER_ID = os.environ.get("FOLDER_ID", "FOLDER_ID environment variable is not set.")
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "SPREADSHEET_ID environment variable is not set.")
 SHEET_NAME = os.environ.get("SHEET_NAME", "SHEET_NAME environment variable is not set.")
 sheet = gc.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)

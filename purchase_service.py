@@ -1,7 +1,8 @@
 from telegram import Update
+from telegram.ext import CallbackContext
 from config import sheet, logger
 
-def add_purchase(update: Update, context) -> None:
+def add_purchase(update: Update, context: CallbackContext) -> None:
     try:
         # Parse user message
         message = update.message.text
