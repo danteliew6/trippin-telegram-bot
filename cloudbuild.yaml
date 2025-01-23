@@ -1,6 +1,4 @@
 steps:
-  options:
-    logging: CLOUD_LOGGING_ONLY
   # Step 1: Install dependencies
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
@@ -23,6 +21,9 @@ steps:
       - 'telegram_webhook'        # Replace with your entry point function name
       - '--region'
       - 'asia-southeast1'         # Replace with your desired region
+
+options:
+  logging: CLOUD_LOGGING_ONLY
 
 substitutions:
   _FUNCTION_NAME: telegram_webhook  # Optional: Define the function name as a variable
