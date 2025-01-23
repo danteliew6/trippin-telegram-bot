@@ -7,6 +7,7 @@ from telegram import Bot
 import google
 from googleapiclient.discovery import build
 from google.cloud import firestore
+from google.oauth2 import service_account
 load_dotenv()
 
 # Set up logging
@@ -16,8 +17,10 @@ logger = logging.getLogger(__name__)
 # Google Sheets setup
 SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE", "SERVICE_ACCOUNT_FILE environment variable is not set.")
 SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-
 credentials, project_id = google.auth.default(scopes=SCOPES)
+# credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+# project_id="1"
+
 gc = gspread.authorize(credentials)
 drive_service = build('drive', 'v3', credentials=credentials)
 db = firestore.Client(credentials=credentials, project=project_id)
