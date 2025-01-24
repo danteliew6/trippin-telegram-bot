@@ -78,7 +78,8 @@ def add_to_database(data: dict, user_id: str) -> dict:
         print(f"Error adding to database: {e}")
         return None
 
-def generate_summary_message(current_items: dict) -> str:
+def generate_summary_message(user_id: str) -> str:
+    current_items = db.collection("trip_information").document(user_id).get().to_dict()
     # Initialize variables for the formatted output and grand total
     formatted_output = 'Below is the updated summary of your trip items \n'
     grand_total = 0
@@ -159,7 +160,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         current_items = add_to_database(extracted_data, str(user_id))
         if current_items:
             update.message.reply_text("Data successfully added to the database!")
-            formatted_summary_message = generate_summary_message(current_items)
+            formatted_summary_message = generate_summary_message(str(user_id))
             update.message.reply_text(formatted_summary_message)
         else:
             update.message.reply_text("Failed to upload data to database. Please try again.")
