@@ -35,7 +35,7 @@ SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "SPREADSHEET_ID environment va
 SHEET_NAME = os.environ.get("SHEET_NAME", "SHEET_NAME environment variable is not set.")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "GEMINI_API_KEY environment variable is not set.")
 genai.configure(api_key=GEMINI_API_KEY)
-sheet = gc.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
+# sheet = gc.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
 
 bot = Bot(token=os.environ.get("TELEGRAM_TOKEN", "TELEGRAM_TOKEN environment variable is not set."))
 
