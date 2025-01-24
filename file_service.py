@@ -48,7 +48,7 @@ def upload_to_gemini(file_path: str, file_name: str) -> dict:
         print(f"Error uploading to Gemini API: {e}")
         return None
 
-def add_to_database(data: dict, user_id: str) -> list:
+def add_to_database(data: dict, user_id: str) -> dict:
     try:
         user_trips_ref = db.collection("trip_information").document(user_id)
         doc = user_trips_ref.get()
@@ -73,7 +73,7 @@ def add_to_database(data: dict, user_id: str) -> list:
         category_data = data['args']['category_data']
         combined_data = common_data | category_data
         user_trips_ref.update({data['args']['category']: firestore.ArrayUnion([combined_data])})
-        return user_trips_ref.get()
+        return user_trips_ref.get().to_dict()
     except Exception as e:
         print(f"Error adding to database: {e}")
         return None
