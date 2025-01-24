@@ -11,8 +11,22 @@ from google.cloud import firestore
 def upload_to_google_drive(file_path: str, file_name: str) -> str:
     file_metadata = {"name": file_name, "parents": [FOLDER_ID]}
     media = MediaFileUpload(file_path, resumable=True)
+
     try:
+        # Check if a file with the same name exists in the target folder
+        query = f"'{FOLDER_ID}' in parents and name = '{file_name}' and trashed = false"
+        response = drive_service.files().list(q=query, fields="files(id, name)").execute()
+        files = response.get("files", [])
+
+        # If a file with the same name exists, delete it
+        if files:
+            for file in files:
+                drive_service.files().delete(fileId=file["id"]).execute()
+                print(f"Deleted existing file: {file['name']} with ID: {file['id']}")
+
+        # Upload the new file
         file = drive_service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+        print(f"Uploaded file: {file_name} with ID: {file.get('id')}")
         return file.get("id")
     except Exception as e:
         print(f"Google Drive Upload Error: {e}")
