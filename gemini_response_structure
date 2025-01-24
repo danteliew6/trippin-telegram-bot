@@ -1,0 +1,21 @@
+{
+    "name": "extract_travel_document_data",
+    "args": {
+        "category_data": {
+            "room_type": "Superior Queen Suite",
+            "check_out_date": "23-03",
+            "check_out_timing": "08:00-10:00",
+            "location": "229 Westbury Road, 7250 Launceston, Australia",
+            "check_in_date": "21-03",
+            "subcategory": "Hotel"
+        },
+        "common_data": {
+            "currency": "SGD",
+            "date_of_purchase": "",
+            "item_name": "Olde Tudor Hotel",
+            "price": 293.0
+        },
+        "category": "Hotels"
+    },
+    "id": ""
+}

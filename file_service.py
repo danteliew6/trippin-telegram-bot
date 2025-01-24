@@ -59,11 +59,43 @@ def add_to_database(data: dict, user_id: str) -> list:
         category_data = data['args']['category_data']
         combined_data = common_data | category_data
         user_trips_ref.update({data['args']['category']: firestore.ArrayUnion([combined_data])})
-        return user_trips_ref.get(data['args']['category'])
+        return user_trips_ref.get()
     except Exception as e:
         print(f"Error adding to database: {e}")
         return None
-    
+
+def generate_summary_message(current_items: dict) -> str:
+    # Initialize variables for the formatted output and grand total
+    formatted_output = 'Below is the updated summary of your trip items \n'
+    grand_total = 0
+
+    # Iterate over the categories in default_schema
+    for category, items in current_items.items():
+        # Add the category header
+        formatted_output += f"{category}:\n"
+
+        # Initialize category total
+        category_total = 0
+
+        # Iterate over items in the category
+        for index, item in enumerate(items, start=1):
+            # Format the item string
+            item_string = f"  {index}. {item['item_name']} - {item['price']}"
+            formatted_output += item_string + "\n"
+
+            # Add the price to the category total
+            category_total += item['price']
+
+        # Add category total to the output
+        formatted_output += f"  Total for {category}: {category_total}\n\n"
+
+        # Add category total to the grand total
+        grand_total += category_total
+
+    # Add the grand total to the output
+    formatted_output += f"Grand Total: {grand_total}"
+
+    return formatted_output
 
 
 # File handler to process uploaded files
@@ -113,6 +145,8 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         current_items = add_to_database(extracted_data)
         if current_items:
             update.message.reply_text("Data successfully added to the database!")
+            formatted_summary_message = generate_summary_message(current_items)
+            update.message.reply_text(formatted_summary_message)
         else:
             update.message.reply_text("Failed to upload data to database. Please try again.")
     else:
