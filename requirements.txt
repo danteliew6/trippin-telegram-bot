@@ -33,3 +33,11 @@ proto-plus==1.25.0
 protobuf==5.29.3
 pyparsing==3.2.1
 uritemplate==4.1.1
+annotated-types==0.7.0
+colorama==0.4.6
+google-ai-generativelanguage==0.6.15
+google-generativeai==0.8.4
+pydantic==2.10.6
+pydantic-core==2.27.2
+tqdm==4.67.1
+typing-extensions==4.12.2

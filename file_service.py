@@ -1,8 +1,11 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 import os
-from config import FOLDER_ID, drive_service, db
+from config import FOLDER_ID, drive_service, db, genai
 from googleapiclient.http import MediaFileUpload
+from gemini_protos_schema import extract_travel_document_data
+import uuid
+from google.cloud import firestore
 
 # Upload file to Google Drive
 def upload_to_google_drive(file_path: str, file_name: str) -> str:
@@ -15,38 +18,53 @@ def upload_to_google_drive(file_path: str, file_name: str) -> str:
         print(f"Google Drive Upload Error: {e}")
         return None
 
-# # Upload file to Gemini API
-# def upload_to_gemini(file_path: str) -> dict:
-#     with open(file_path, "rb") as file:
-#         files = {"file": file}
-#         headers = {"Authorization": f"Bearer {GEMINI_API_KEY}"}
-#         try:
-#             response = requests.post(GEMINI_API_URL, files=files, headers=headers)
-#             if response.status_code == 200:
-#                 return response.json().get("data", "No data extracted.")
-#             else:
-#                 print(f"Gemini API Error: {response.status_code} - {response.text}")
-#                 return None
-#         except Exception as e:
-#             print(f"Error uploading to Gemini API: {e}")
-#             return None
+# Upload file to Gemini API
+def upload_to_gemini(file_path: str, file_name: str) -> dict:
+    try:
+        uploaded_file = genai.upload_file(path=file_path, display_name=file_name, mime_type="application/pdf")
+        model = genai.GenerativeModel("gemini-1.5-flash", tools=[extract_travel_document_data])
+        response = model.generate_content(
+            ["Please extract the data from this document. For any dates being extracted, ensure it follows the format DD-MM-YYYY. For dates without year provided, use DD-MM only. Purchase date should be blank if not specified", uploaded_file],
+            tool_config={'function_calling_config':'ANY'}
+        )
 
-# # Append data to Google Sheets
-# def append_to_google_sheets(data: dict) -> None:
-#     # Prepare data for insertion
-#     rows = [[key, value] for key, value in data.items()]
+        fc = response.candidates[0].content.parts[0].function_call
+        return type(fc).to_dict(fc)
+    except Exception as e:
+        print(f"Error uploading to Gemini API: {e}")
+        return None
 
-#     # Append the data
-#     body = {"values": rows}
-#     try:
-#         sheets_service.spreadsheets().values().append(
-#             spreadsheetId=GOOGLE_SHEET_ID,
-#             range="Sheet1",  # Adjust the range as needed
-#             valueInputOption="RAW",
-#             body=body,
-#         ).execute()
-#     except Exception as e:
-#         print(f"Google Sheets Append Error: {e}")
+def add_to_database(data: dict, user_id: str) -> list:
+    try:
+        user_trips_ref = db.collection("trip_information").document(user_id)
+        doc = user_trips_ref.get()
+        if not doc.exists:
+            default_schema = {
+                "Hotels": [],
+                "Flights": [],
+                "Transport": [],
+                "Rentals": [],
+                "Activities": [],
+                "Insurance": [],
+                "Miscellaneous": [],
+            }
+
+            # Create the document with the default schema
+            user_trips_ref.set(default_schema)
+            print(f"Default schema created for user {user_id}.")
+        else:
+            print(f"Document for user {user_id} already exists.")
+
+        common_data = data['args']['common_data']
+        category_data = data['args']['category_data']
+        combined_data = common_data | category_data
+        user_trips_ref.update({data['args']['category']: firestore.ArrayUnion([combined_data])})
+        return user_trips_ref.get(data['args']['category'])
+    except Exception as e:
+        print(f"Error adding to database: {e}")
+        return None
+    
+
 
 # File handler to process uploaded files
 def handle_file_upload(update: Update, context: CallbackContext) -> None:
@@ -59,20 +77,21 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("Please use /upload_documents before uploading a file.")
         return
     
-    file = update.message.document or update.message.photo[-1]
+    file = update.message.document
 
     # Get the file information
     file_id = file.file_id
-    file_name = file.file_name if hasattr(file, "file_name") else "image.jpg"
+    file_name = file.file_name if hasattr(file, "file_name") else ""
     file_extension = os.path.splitext(file_name)[1].lower()
 
     # Validate file type
-    if file_extension not in [".pdf", ".png", ".jpg", ".jpeg"]:
-        update.message.reply_text("Unsupported file type! Please upload a PDF or image file.")
+    if file_extension not in [".pdf"]:
+        update.message.reply_text("Unsupported file type! Please upload a PDF file.")
         return
 
     # Download the file locally
-    local_file_path = f"temp_{file_name}"
+    # local_file_path = f"temp_{}"
+    local_file_path = f"{uuid.uuid4().hex[:8]}.pdf"
     file_obj = context.bot.get_file(file_id)
     file_obj.download(local_file_path)
 
@@ -85,14 +104,16 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("File uploaded to Google Drive.")
 
     # Send the file to Gemini API
-    # response = upload_to_gemini(local_file_path)
-    # os.remove(local_file_path)  # Clean up local file
+    extracted_data = upload_to_gemini(local_file_path)
+    os.remove(local_file_path)  # Clean up local file
 
-    # if response:
-    #     update.message.reply_text("File processed successfully! Adding data to the spreadsheet...")
-        # # Append the extracted data to Google Sheets
-        # append_to_google_sheets(response)
-        # update.message.reply_text("Data successfully added to the spreadsheet!")
-    # else:
-    #     update.message.reply_text("Failed to process the file. Please try again.")
-
+    if extracted_data:
+        update.message.reply_text("File processed successfully! Adding data to the database...")
+        # Append the extracted data to Google Sheets
+        current_items = add_to_database(extracted_data)
+        if current_items:
+            update.message.reply_text("Data successfully added to the database!")
+        else:
+            update.message.reply_text("Failed to upload data to database. Please try again.")
+    else:
+        update.message.reply_text("Failed to process the file. Please try again.")
