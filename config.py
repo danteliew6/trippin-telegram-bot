@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 # Google Sheets setup
 SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE", "SERVICE_ACCOUNT_FILE environment variable is not set.")
 SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/cloud-platform"]
-# credentials, project_id = google.auth.default(scopes=SCOPES)
-credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+credentials, project_id = google.auth.default(scopes=SCOPES)
+# credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 # project_id="1"
 
 gc = gspread.authorize(credentials)
