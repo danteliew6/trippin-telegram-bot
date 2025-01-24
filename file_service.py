@@ -156,7 +156,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
     if extracted_data:
         update.message.reply_text("File processed successfully! Adding data to the database...")
         # Append the extracted data to Google Sheets
-        current_items = add_to_database(extracted_data)
+        current_items = add_to_database(extracted_data, user_id)
         if current_items:
             update.message.reply_text("Data successfully added to the database!")
             formatted_summary_message = generate_summary_message(current_items)
