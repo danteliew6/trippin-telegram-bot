@@ -136,7 +136,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("File uploaded to Google Drive.")
 
     # Send the file to Gemini API
-    extracted_data = upload_to_gemini(local_file_path)
+    extracted_data = upload_to_gemini(local_file_path, file_name)
     os.remove(local_file_path)  # Clean up local file
 
     if extracted_data:
