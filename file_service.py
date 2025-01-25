@@ -35,7 +35,12 @@ def upload_to_google_drive(file_path: str, file_name: str) -> str:
 # Upload file to Gemini API
 def upload_to_gemini(file_path: str, file_name: str) -> dict:
     try:
-        uploaded_file = genai.upload_file(path=file_path, display_name=file_name, mime_type="application/pdf")
+        mime_type = file_name.split('.')[-1].lower()
+        if mime_type == 'pdf':
+            uploaded_file = genai.upload_file(path=file_path, display_name=file_name, mime_type="application/pdf")
+        else: 
+            uploaded_file = genai.upload_file(path=file_path, display_name=file_name, mime_type=f"image/{mime_type}")
+
         model = genai.GenerativeModel("gemini-1.5-flash", tools=[extract_travel_document_data])
         response = model.generate_content(
             ["Please extract the data from this document. For any dates being extracted, ensure it follows the format DD-MM-YYYY. For dates without year provided, use DD-MM only. Purchase date should be blank if not specified", uploaded_file],
@@ -132,8 +137,8 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
     file_extension = os.path.splitext(file_name)[1].lower()
 
     # Validate file type
-    if file_extension not in [".pdf"]:
-        update.message.reply_text("Unsupported file type! Please upload a PDF file.")
+    if file_extension not in [".pdf", ".png", ".jpeg", ".webp", ".heic", ".heif"]:
+        update.message.reply_text("Unsupported file type! Please upload a PDF file or a valid image file.")
         return
 
     # Download the file locally
