@@ -153,7 +153,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("Please use /select_trip or /create_trip to select your trip to upload before uploading a file.")
         return 
     
-    destination_blob_name = f"{user_id}/{user_doc.to_dict().get("selected_trip")}/{local_file_path}"
+    destination_blob_name = f"{user_id}/{user_doc.to_dict().get('selected_trip')}/{local_file_path}"
     is_uploaded = upload_blob(TRAVEL_FILE_BUCKET_NAME, file_name, destination_blob_name)
 
     if not is_uploaded:
