@@ -1,11 +1,12 @@
 from telegram import Update
 from telegram.ext import CallbackContext
 import os
-from config import FOLDER_ID, drive_service, db, genai
+from config import FOLDER_ID, drive_service, db, genai, TRAVEL_FILE_BUCKET_NAME
 from googleapiclient.http import MediaFileUpload
 from gemini_protos_schema import extract_travel_document_data
 import uuid
 from google.cloud import firestore
+from gcs_utils import upload_blob
 
 # Upload file to Google Drive
 def upload_to_google_drive(file_path: str, file_name: str) -> str:
@@ -147,9 +148,15 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
     file_obj = context.bot.get_file(file_id)
     file_obj.download(local_file_path)
 
-    # Upload the file to Google Drive
-    drive_file_id = upload_to_google_drive(local_file_path, file_name)
-    if not drive_file_id:
+    # Upload the file to GCS bucket
+    if not user_doc.exists or not user_doc.to_dict().get("selected_trip", False):
+        update.message.reply_text("Please use /select_trip or /create_trip to select your trip to upload before uploading a file.")
+        return 
+    
+    destination_blob_name = f"{user_id}/{user_doc.to_dict().get("selected_trip")}/{local_file_path}"
+    is_uploaded = upload_blob(TRAVEL_FILE_BUCKET_NAME, file_name, destination_blob_name)
+
+    if not is_uploaded:
         update.message.reply_text("Failed to upload file to Google Drive.")
         return
     else:

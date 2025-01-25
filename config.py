@@ -6,12 +6,12 @@ from dotenv import load_dotenv
 from telegram import Bot
 import google
 from googleapiclient.discovery import build
-from google.cloud import firestore
+from google.cloud import firestore, storage
 from google.oauth2 import service_account
 import google.generativeai as genai
 
 load_dotenv()
-
+SELECTING_TRIP, CREATING_TRIP, UPLOADING_FILE = range(3)
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,6 +28,8 @@ drive_service = build('drive', 'v3', credentials=credentials)
 
 # db = firestore.Client(credentials=credentials, project=project_id)
 db = firestore.Client(credentials=credentials)
+TRAVEL_FILE_BUCKET_NAME = os.environ.get("TRAVEL_FILE_BUCKET_NAME", "TRAVEL_FILE_BUCKET_NAME environment variable is not set.")
+
 
 # Replace with your Google Sheet ID
 FOLDER_ID = os.environ.get("FOLDER_ID", "FOLDER_ID environment variable is not set.")

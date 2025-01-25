@@ -1,9 +1,9 @@
 from telegram import Update
-from telegram.ext import CommandHandler, MessageHandler, Filters, Dispatcher
-from config import bot
+from telegram.ext import CommandHandler, MessageHandler, Filters, Dispatcher, ConversationHandler
+from config import bot, SELECTING_TRIP
 from file_service import handle_file_upload
 # from purchase_service import add_purchase
-from commands import start, upload_documents, cancel_upload
+from commands import start, upload_documents, cancel_upload, select_trip_command, handle_trip_selection, cancel
 
 
 
@@ -18,5 +18,16 @@ def telegram_webhook(request):
         dispatcher.add_handler(CommandHandler("cancel_upload", cancel_upload))
         # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, add_purchase))
         dispatcher.add_handler(MessageHandler(Filters.document | Filters.photo, handle_file_upload))
+
+        # Select Trip Conversation
+        select_trip_handler = ConversationHandler(
+                entry_points=[CommandHandler("select_trip", select_trip_command)],
+                states={
+                    SELECTING_TRIP: [MessageHandler(Filters.text & ~Filters.command, handle_trip_selection)],
+                },
+                fallbacks=[CommandHandler("cancel", cancel)],
+            )
+        dispatcher.add_handler(select_trip_handler)
+        
         dispatcher.process_update(update)
         return "OK", 200
