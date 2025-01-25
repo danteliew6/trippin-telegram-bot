@@ -129,7 +129,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("Please use /upload_documents before uploading a file.")
         return
     
-    file = update.message.document
+    file = update.message.document or update.message.photo[-1]
 
     # Get the file information
     file_id = file.file_id
@@ -143,7 +143,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
 
     # Download the file locally
     # local_file_path = f"temp_{}"
-    local_file_path = f"{uuid.uuid4().hex[:8]}.pdf"
+    local_file_path = f"{uuid.uuid4().hex[:8]}{file_extension}"
     file_obj = context.bot.get_file(file_id)
     file_obj.download(local_file_path)
 
