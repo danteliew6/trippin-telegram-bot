@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, Filters, Dispatcher
 from config import bot
 from file_service import handle_file_upload
-from purchase_service import add_purchase
+# from purchase_service import add_purchase
 from commands import start, upload_documents, cancel_upload
 
 
