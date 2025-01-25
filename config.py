@@ -1,13 +1,11 @@
 import os
-import json
 import logging
 import gspread
 from dotenv import load_dotenv
 from telegram import Bot
 import google
 from googleapiclient.discovery import build
-from google.cloud import firestore, storage
-from google.oauth2 import service_account
+from google.cloud import firestore
 import google.generativeai as genai
 
 load_dotenv()
@@ -20,14 +18,11 @@ logger = logging.getLogger(__name__)
 SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE", "SERVICE_ACCOUNT_FILE environment variable is not set.")
 SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/cloud-platform"]
 credentials, project_id = google.auth.default(scopes=SCOPES)
-# credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-# project_id="1"
 
 gc = gspread.authorize(credentials)
 drive_service = build('drive', 'v3', credentials=credentials)
 
-# db = firestore.Client(credentials=credentials, project=project_id)
-db = firestore.Client(credentials=credentials)
+db = firestore.Client(credentials=credentials, project=project_id)
 TRAVEL_FILE_BUCKET_NAME = os.environ.get("TRAVEL_FILE_BUCKET_NAME", "TRAVEL_FILE_BUCKET_NAME environment variable is not set.")
 
 
