@@ -53,11 +53,11 @@ def cancel(update: Update, context: CallbackContext):
 
 def create_trip_command(update: Update, context: CallbackContext):
     update.message.reply_text("""
-                              To start creating, we will require some details from you:
+    To start creating, we will require some details from you:
 
-                              1. Name/Title of the trip
-                              2. Number of people going on the trip
-                            
-                              Please enter the details separated by a comma (e.g. "Australia,2")
-                              """)
+    1. Name/Title of the trip
+    2. Number of people going on the trip
+
+    Please enter the details separated by a comma (e.g. "Australia,2")
+    """)
     return states['CREATE_TRIP']
