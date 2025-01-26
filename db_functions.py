@@ -55,3 +55,8 @@ def initialise_trip_information(user_id, trip_name):
     # Create the document with the default schema
     trip_info_ref.set(default_schema)
 
+
+def user_initialised(user_id: str):
+    user_ref = db.collection("user_uploads").document(user_id)
+    doc = user_ref.get()
+    return  doc.exists and doc.to_dict().get('upload_mode', False) and doc.to_dict().get('selected_trip', False)
