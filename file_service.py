@@ -4,34 +4,35 @@ import os
 from config import FOLDER_ID, drive_service, db, genai, TRAVEL_FILE_BUCKET_NAME
 from googleapiclient.http import MediaFileUpload
 from gemini_protos_schema import extract_travel_document_data
-import uuid
+from utils import generate_file_uuid
 from google.cloud import firestore
 from gcs_utils import upload_blob
+from db_functions import get_trips_info_ref, get_selected_trip, get_upload_mode, get_trip_uuid
 
 # Upload file to Google Drive
-def upload_to_google_drive(file_path: str, file_name: str) -> str:
-    file_metadata = {"name": file_name, "parents": [FOLDER_ID]}
-    media = MediaFileUpload(file_path, resumable=True)
+# def upload_to_google_drive(file_path: str, file_name: str) -> str:
+#     file_metadata = {"name": file_name, "parents": [FOLDER_ID]}
+#     media = MediaFileUpload(file_path, resumable=True)
 
-    try:
-        # Check if a file with the same name exists in the target folder
-        query = f"'{FOLDER_ID}' in parents and name = '{file_name}' and trashed = false"
-        response = drive_service.files().list(q=query, fields="files(id, name)").execute()
-        files = response.get("files", [])
+#     try:
+#         # Check if a file with the same name exists in the target folder
+#         query = f"'{FOLDER_ID}' in parents and name = '{file_name}' and trashed = false"
+#         response = drive_service.files().list(q=query, fields="files(id, name)").execute()
+#         files = response.get("files", [])
 
-        # If a file with the same name exists, delete it
-        if files:
-            for file in files:
-                drive_service.files().delete(fileId=file["id"]).execute()
-                print(f"Deleted existing file: {file['name']} with ID: {file['id']}")
+#         # If a file with the same name exists, delete it
+#         if files:
+#             for file in files:
+#                 drive_service.files().delete(fileId=file["id"]).execute()
+#                 print(f"Deleted existing file: {file['name']} with ID: {file['id']}")
 
-        # Upload the new file
-        file = drive_service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-        print(f"Uploaded file: {file_name} with ID: {file.get('id')}")
-        return file.get("id")
-    except Exception as e:
-        print(f"Google Drive Upload Error: {e}")
-        return None
+#         # Upload the new file
+#         file = drive_service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+#         print(f"Uploaded file: {file_name} with ID: {file.get('id')}")
+#         return file.get("id")
+#     except Exception as e:
+#         print(f"Google Drive Upload Error: {e}")
+#         return None
 
 # Upload file to Gemini API
 def upload_to_gemini(file_path: str, file_name: str) -> dict:
@@ -56,30 +57,32 @@ def upload_to_gemini(file_path: str, file_name: str) -> dict:
 
 def add_to_database(data: dict, user_id: str) -> dict:
     try:
-        user_trips_ref = db.collection("trip_information").document(user_id)
-        doc = user_trips_ref.get()
-        if not doc.exists:
-            default_schema = {
-                "Hotels": [],
-                "Flights": [],
-                "Transport": [],
-                "Rentals": [],
-                "Activities": [],
-                "Insurance": [],
-                "Miscellaneous": [],
-            }
+        trips_info_ref = get_trips_info_ref(user_id)
+        selected_trip = get_selected_trip(user_id)
+        # if not doc.to_dict().get(selected_trip, False):
+        #     default_schema = {
+        #         selected_trip: {
+        #             "Hotels": [],
+        #             "Flights": [],
+        #             "Transport": [],
+        #             "Rentals": [],
+        #             "Activities": [],
+        #             "Insurance": [],
+        #             "Miscellaneous": [],
+        #         }
+        #     }
 
-            # Create the document with the default schema
-            user_trips_ref.set(default_schema)
-            print(f"Default schema created for user {user_id}.")
-        else:
-            print(f"Document for user {user_id} already exists.")
+        #     # Create the document with the default schema
+        #     trips_info_ref.set(default_schema)
+        #     print(f"Default schema created for user {user_id}.")
+        # else:
+        #     print(f"Document for user {user_id} already exists.")
 
         common_data = data['args']['common_data']
         category_data = data['args']['category_data']
         combined_data = common_data | category_data
-        user_trips_ref.update({data['args']['category']: firestore.ArrayUnion([combined_data])})
-        return user_trips_ref.get().to_dict()
+        trips_info_ref.update({selected_trip: {data['args']['category']: firestore.ArrayUnion([combined_data])}})
+        return trips_info_ref.get().to_dict()
     except Exception as e:
         print(f"Error adding to database: {e}")
         return None
@@ -121,12 +124,10 @@ def generate_summary_message(user_id: str) -> str:
 
 # File handler to process uploaded files
 def handle_file_upload(update: Update, context: CallbackContext) -> None:
-    user_id = update.message.from_user.id
-    user_ref = db.collection("user_uploads").document(str(user_id))
-    user_doc = user_ref.get()
+    user_id = str(update.message.from_user.id)
 
     # Check if the user is in "upload mode"
-    if not user_doc.exists or not user_doc.to_dict().get("upload_mode", False):
+    if not get_upload_mode(user_id):
         update.message.reply_text("Please use /upload_documents before uploading a file.")
         return
     
@@ -144,16 +145,14 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
 
     # Download the file locally
     # local_file_path = f"temp_{}"
-    local_file_path = f"{uuid.uuid4().hex[:8]}{file_extension}"
+    local_file_path = f"{generate_file_uuid()}{file_extension}"
     file_obj = context.bot.get_file(file_id)
     file_obj.download(local_file_path)
 
-    # Upload the file to GCS bucket
-    if not user_doc.exists or not user_doc.to_dict().get("selected_trip", False):
-        update.message.reply_text("Please use /select_trip or /create_trip to select your trip to upload before uploading a file.")
-        return 
+    selected_trip = get_selected_trip(user_id)
+    trip_uuid = get_trip_uuid(user_id, selected_trip)
     
-    destination_blob_name = f"{user_id}/{user_doc.to_dict().get('selected_trip')}/{local_file_path}"
+    destination_blob_name = f"{user_id}/{trip_uuid}/{local_file_path}"
     is_uploaded = upload_blob(TRAVEL_FILE_BUCKET_NAME, file_name, destination_blob_name)
 
     if not is_uploaded:

@@ -9,7 +9,12 @@ from google.cloud import firestore
 import google.generativeai as genai
 
 load_dotenv()
-SELECTING_TRIP, CREATING_TRIP, UPLOADING_FILE = range(3)
+states = {
+    "CREATE_TRIP": 0,
+    "GATHER_TRIP_INFO": 1,
+    "SELECTING_TRIP": 2
+}
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
