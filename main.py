@@ -15,11 +15,6 @@ def telegram_webhook(request):
         update = Update.de_json(request.get_json(force=True), bot)
         dispatcher = Dispatcher(bot, None, workers=0)
         dispatcher.add_handler(CommandHandler("start", start))
-        dispatcher.add_handler(CommandHandler("upload_documents", upload_documents))
-        dispatcher.add_handler(CommandHandler("cancel_upload", cancel_upload))
-        # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, add_purchase))
-        dispatcher.add_handler(MessageHandler(Filters.document | Filters.photo, handle_file_upload))
-
         # Select Trip Conversation
         select_trip_handler = ConversationHandler(
                 entry_points=[CommandHandler("select_trip", select_trip_command)],
@@ -27,6 +22,7 @@ def telegram_webhook(request):
                     states['SELECTING_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_selection)],
                 },
                 fallbacks=[CommandHandler("cancel", cancel)],
+                run_async=True
             )
         
         create_trip_handler = ConversationHandler(
@@ -35,9 +31,15 @@ def telegram_webhook(request):
                     states['CREATE_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_creation)],
                 },
                 fallbacks=[CommandHandler("cancel", cancel)],
+                run_async=True
             )
         dispatcher.add_handler(create_trip_handler)
         dispatcher.add_handler(select_trip_handler)
-        
+
+        dispatcher.add_handler(CommandHandler("upload_documents", upload_documents))
+        dispatcher.add_handler(CommandHandler("cancel_upload", cancel_upload))
+        # dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, add_purchase))
+        dispatcher.add_handler(MessageHandler(Filters.document | Filters.photo, handle_file_upload))
+
         dispatcher.process_update(update)
         return "OK", 200
