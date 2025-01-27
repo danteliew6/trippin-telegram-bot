@@ -64,7 +64,7 @@ def handle_trip_creation(update: Update, context: CallbackContext):
             trips_ref.update({"trips": trips})
             update_user_uploads(user_id, True)
             update_selected_trip(user_id, trip_name)
-            initialise_trip_information(user_id)
+            initialise_trip_information(user_id, trip_name)
 
             print(f"Trip added for user {user_id}")
             update.message.reply_text(
