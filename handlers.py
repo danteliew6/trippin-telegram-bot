@@ -27,7 +27,7 @@ def handle_trip_selection(update: Update, context: CallbackContext):
                 trips_doc = trips_ref.get()
                 trips = trips_doc.to_dict().get("trips", {})
                 trip_buttons = [[InlineKeyboardButton(trip, callback_data=trip)] for trip in trips]
-                trip_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])  # Cancel button
+                trip_buttons.append(InlineKeyboardButton("Cancel", callback_data="cancel"))  # Cancel button
 
                 query.edit_message_text(\
                     "❌ Invalid trip name. Please select a valid trip from the list.",\
@@ -75,7 +75,7 @@ def handle_trip_creation(update: Update, context: CallbackContext):
         else:
             update.message.reply_text(\
                 "This trip name is already used. Please try again with another trip name.\n\n Enter the required details with comma-separated delimiters (e.g. Australia,2).",\
-                reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Cancel", callback_data="cancel")], one_time_keyboard=True)\
+                reply_markup=InlineKeyboardMarkup(InlineKeyboardButton("Cancel", callback_data="cancel"), one_time_keyboard=True)\
             )
             return states['CREATE_TRIP']
     except Exception as e:
@@ -83,6 +83,6 @@ def handle_trip_creation(update: Update, context: CallbackContext):
         # Invalid selection
         update.message.reply_text(\
             "❌ Invalid trip details. Please enter the required details with comma-separated delimiters (e.g. Australia,2).",\
-            reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Cancel", callback_data="cancel")], one_time_keyboard=True)\
+            reply_markup=InlineKeyboardMarkup(InlineKeyboardButton("Cancel", callback_data="cancel"), one_time_keyboard=True)\
         )
         return states['CREATE_TRIP']
