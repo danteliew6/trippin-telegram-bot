@@ -1,5 +1,5 @@
 from telegram.ext import CallbackContext, ConversationHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from config import db, TRAVEL_FILE_BUCKET_NAME, states
 from gcs_utils import check_folder_exists
 from utils import generate_trip_uuid
@@ -41,7 +41,7 @@ def handle_trip_selection(update: Update, context: CallbackContext):
     except Exception as e:
         print(f'Error: {e}')
         # Invalid selection
-        update.message.reply_text("❌ Error processing selection, please try again.")
+        query.edit_message_text("❌ Error processing selection, please try again.")
         return ConversationHandler.END
 
     

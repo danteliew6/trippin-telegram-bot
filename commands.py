@@ -1,8 +1,8 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardRemove
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ConversationHandler
-from config import db, states
-from gcs_utils import check_folder_exists
+from config import states
 from db_functions import update_user_uploads, get_trips_ref, user_initialised
+
 # Telegram bot command handlers
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Welcome! Please run the /create_trip command to begin your journey in tracking your itinerary!")
@@ -51,7 +51,7 @@ def select_trip_command(update: Update, context: CallbackContext):
         trip_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])  # Cancel button
         update.message.reply_text(
             f"Please select a trip:\n\n{trip_list}",
-            reply_markup=InlineKeyboardMarkup(trip_buttons, one_time_keyboard=True)
+            reply_markup=InlineKeyboardMarkup(trip_buttons)
         )
 
         # Save trips to context for validation
@@ -59,8 +59,7 @@ def select_trip_command(update: Update, context: CallbackContext):
         return states['SELECTING_TRIP']
     else:
         update.message.reply_text("You don't have any trips yet! Create one using /create_trip.")
-        
-        return cancel(update, context)
+        return ConversationHandler.END
 
 
 def cancel(update: Update, context: CallbackContext):
