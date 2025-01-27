@@ -13,6 +13,8 @@ def upload_documents(update: Update, context: CallbackContext) -> None:
     user_id = str(update.message.from_user.id)
     if not user_initialised(user_id):
         update.message.reply_text("Error, please create and select your trip before enabling upload")
+        return ConversationHandler.END
+
 
     update_user_uploads(user_id, True)
     update.message.reply_text("Upload has been enabled! you can upload your travel document invoices or booking confirmation in PDF or image files to track your purchases.")
@@ -22,12 +24,15 @@ def cancel_upload(update: Update, context: CallbackContext) -> None:
     user_id = str(update.message.from_user.id)
     if not user_initialised(user_id):
         update.message.reply_text("Error, unable to cancel as you have not created or selected your trip")
+        return ConversationHandler.END
+
     update_user_uploads(user_id, False)
     update.message.reply_text("Upload mode canceled. Type /upload_documents to start again.")
     return ConversationHandler.END
 
 
 def select_trip_command(update: Update, context: CallbackContext):
+    print('Selecting trip....')
     user_id = str(update.message.from_user.id)
     trips_ref = get_trips_ref(user_id)
 
@@ -62,6 +67,7 @@ def cancel(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 def create_trip_command(update: Update, context: CallbackContext):
+    print('Creating trip....')
     update.message.reply_text("""
     To start creating, we will require some details from you:
 
