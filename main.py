@@ -13,7 +13,7 @@ from handlers import handle_trip_selection, handle_trip_creation
 def telegram_webhook(request):
     if request.method == "POST":
         update = Update.de_json(request.get_json(force=True), bot)
-        dispatcher = Dispatcher(bot, None, workers=0)
+        dispatcher = Dispatcher(bot, None, workers=1)
         dispatcher.add_handler(CommandHandler("start", start))
         # Select Trip Conversation
         select_trip_handler = ConversationHandler(
