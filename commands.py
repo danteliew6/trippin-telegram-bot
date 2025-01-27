@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, ConversationHandler
 from config import db, states
 from gcs_utils import check_folder_exists
@@ -46,18 +46,19 @@ def select_trip_command(update: Update, context: CallbackContext):
             return ConversationHandler.END
 
         # Display trips as a list
-        trip_list = "\n".join([f"{i+1}. {key}: {value}" for i, (key, value) in enumerate(trips.items())])
+        trip_list = "\n".join([f"{i+1}. {key}: {value['num_people']} Pax" for i, (key, value) in enumerate(trips.items())])
+        trip_buttons = [[InlineKeyboardButton(trip, callback_data=trip)] for trip in trips]
+        trip_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])  # Cancel button
         update.message.reply_text(
             f"Please select a trip by replying with the name:\n\n{trip_list}",
-            reply_markup=ReplyKeyboardMarkup([[trip] for trip in trips], one_time_keyboard=True)
+            reply_markup=InlineKeyboardMarkup(trip_buttons, one_time_keyboard=True)
         )
 
         # Save trips to context for validation
         context.user_data["trips"] = trips
         return states['SELECTING_TRIP']
     else:
-        update.message.reply_text("You don't have any trips yet! Create one using /create_trip.",
-                                  reply_markup=ReplyKeyboardRemove())
+        update.message.reply_text("You don't have any trips yet! Create one using /create_trip.")
         
         return cancel(update, context)
 
@@ -75,5 +76,7 @@ def create_trip_command(update: Update, context: CallbackContext):
     2. Number of people going on the trip
 
     Please enter the details separated by a comma (e.g. "Australia,2")
-    """)
+    """,
+    reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Cancel", callback_data="cancel")], one_time_keyboard=True)
+    )
     return states['CREATE_TRIP']

@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import CommandHandler, MessageHandler, Filters, Dispatcher, ConversationHandler
+from telegram.ext import CommandHandler, MessageHandler, Filters, Dispatcher, ConversationHandler, CallbackQueryHandler
 from config import bot, states
 from file_service import handle_file_upload
 # from purchase_service import add_purchase
@@ -13,7 +13,11 @@ dispatcher.add_handler(CommandHandler("start", start))
 select_trip_handler = ConversationHandler(
         entry_points=[CommandHandler("select_trip", select_trip_command)],
         states={
-            states['SELECTING_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_selection)],
+            states['SELECTING_TRIP']: [
+                CallbackQueryHandler(cancel, pattern="^cancel$"),  # Handle "Cancel" button clicks
+                CallbackQueryHandler(handle_trip_selection)
+                ]
+
         },
         fallbacks=[CommandHandler("cancel", cancel)]
         # run_async=True
@@ -23,7 +27,10 @@ dispatcher.add_handler(select_trip_handler)
 create_trip_handler = ConversationHandler(
         entry_points=[CommandHandler("create_trip", create_trip_command)],
         states={
-            states['CREATE_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_creation)],
+            states['CREATE_TRIP']: [
+                MessageHandler(Filters.text & ~Filters.command, handle_trip_creation),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),  # Handle "Cancel" button clicks
+                ],
         },
         fallbacks=[CommandHandler("cancel", cancel)]
         # run_async=True
