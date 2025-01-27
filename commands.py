@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, ConversationHandler
 from config import db, states
 from gcs_utils import check_folder_exists
@@ -34,14 +34,14 @@ def select_trip_command(update: Update, context: CallbackContext):
     # Fetch trips for the user
     trips_doc = trips_ref.get()
     if trips_doc.exists:
-        trips = trips_doc.to_dict().get("trips", [])
+        trips = trips_doc.to_dict().get("trips", {})
         # TODO: MODIFY THIS TO DICT
         if not trips:
             update.message.reply_text("You don't have any trips yet! Create one using /create_trip.")
             return ConversationHandler.END
 
         # Display trips as a list
-        trip_list = "\n".join([f"{i+1}. {trip}" for i, trip in enumerate(trips)])
+        trip_list = "\n".join([f"{i+1}. {key}: {value}" for i, (key, value) in enumerate(trips.items())])
         update.message.reply_text(
             f"Please select a trip by replying with the name:\n\n{trip_list}",
             reply_markup=ReplyKeyboardMarkup([[trip] for trip in trips], one_time_keyboard=True)
@@ -51,8 +51,10 @@ def select_trip_command(update: Update, context: CallbackContext):
         context.user_data["trips"] = trips
         return states['SELECTING_TRIP']
     else:
-        update.message.reply_text("You don't have any trips yet! Create one using /create_trip.")
-        return ConversationHandler.END
+        update.message.reply_text("You don't have any trips yet! Create one using /create_trip.",
+                                  reply_markup=ReplyKeyboardRemove())
+        
+        return cancel(update, context)
 
 
 def cancel(update: Update, context: CallbackContext):

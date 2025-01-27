@@ -42,23 +42,23 @@ def handle_trip_selection(update: Update, context: CallbackContext):
         )
         return states['SELECTING_TRIP']
 
-def handle_trip_selection(update: Update, context: CallbackContext):
-    user_id = update.message.from_user.id
-    selected_trip = update.message.text
-    folder_prefix = f'{user_id}/{selected_trip}'
-    if check_folder_exists(TRAVEL_FILE_BUCKET_NAME,folder_prefix):
-        user_ref = db.collection("user_uploads").document(str(user_id))
-        user_ref.update({"selected_trip": selected_trip})
+# def handle_trip_selection(update: Update, context: CallbackContext):
+#     user_id = update.message.from_user.id
+#     selected_trip = update.message.text
+#     folder_prefix = f'{user_id}/{selected_trip}'
+#     if check_folder_exists(TRAVEL_FILE_BUCKET_NAME,folder_prefix):
+#         user_ref = db.collection("user_uploads").document(str(user_id))
+#         user_ref.update({"selected_trip": selected_trip})
 
-        # Confirmation message
-        update.message.reply_text(f"✅ You have selected '{selected_trip}' as your trip!")
-        return ConversationHandler.END
-    else:
-        # Invalid selection
-        update.message.reply_text(
-            "❌ Invalid trip name. Please select a valid trip from the list."
-        )
-        return states['SELECTING_TRIP']
+#         # Confirmation message
+#         update.message.reply_text(f"✅ You have selected '{selected_trip}' as your trip!")
+#         return ConversationHandler.END
+#     else:
+#         # Invalid selection
+#         update.message.reply_text(
+#             "❌ Invalid trip name. Please select a valid trip from the list."
+#         )
+#         return states['SELECTING_TRIP']
     
 def handle_trip_creation(update: Update, context: CallbackContext):
     try:
