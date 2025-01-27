@@ -16,15 +16,15 @@ def telegram_webhook(request):
         dispatcher = Dispatcher(bot, None, workers=1)
         dispatcher.add_handler(CommandHandler("start", start))
         # Select Trip Conversation
-        select_trip_handler = ConversationHandler(
-                entry_points=[CommandHandler("select_trip", select_trip_command)],
-                states={
-                    states['SELECTING_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_selection)],
-                },
-                fallbacks=[CommandHandler("cancel", cancel)],
-                run_async=True
-            )
-        dispatcher.add_handler(select_trip_handler)
+        # select_trip_handler = ConversationHandler(
+        #         entry_points=[CommandHandler("select_trip", select_trip_command)],
+        #         states={
+        #             states['SELECTING_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_selection)],
+        #         },
+        #         fallbacks=[CommandHandler("cancel", cancel)],
+        #         run_async=True
+        #     )
+        # dispatcher.add_handler(select_trip_handler)
         
         create_trip_handler = ConversationHandler(
                 entry_points=[CommandHandler("create_trip", create_trip_command)],
