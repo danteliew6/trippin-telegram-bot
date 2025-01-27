@@ -2,11 +2,11 @@ from config import db
 
 def update_user_uploads(user_id: str, upload_mode: bool):
     user_ref = db.collection("user_uploads").document(user_id)
-    user_ref.set({"upload_mode": upload_mode}) 
+    user_ref.set({"upload_mode": upload_mode}, merge=True) 
 
 def update_selected_trip(user_id: str, selected_trip: str):
     user_ref = db.collection("user_uploads").document(user_id)
-    user_ref.set({"selected_trip": selected_trip}) 
+    user_ref.set({"selected_trip": selected_trip}, merge=True) 
 
 def get_trips_ref(user_id: str):
     return db.collection("trips").document(user_id)
@@ -30,13 +30,13 @@ def get_upload_mode(user_id):
 def get_trip_uuid(user_id, selected_trip):
     trips_ref = db.collection("trips").document(user_id)
     doc = trips_ref.get().to_dict()
-    return doc['trips'][selected_trip]['uuid']
+    return doc[selected_trip]['uuid']
 
 def initialise_trips(user_id):
     trips_ref = db.collection("trips").document(user_id)
     doc = trips_ref.get()
-    if not doc.exists or not doc.to_dict().get('trips', False):
-        trips_ref.set({"trips": {}})
+    if not doc.exists:
+        trips_ref.set({})
 
 def initialise_trip_information(user_id, trip_name):
     trip_info_ref = db.collection("trip_information").document(user_id)

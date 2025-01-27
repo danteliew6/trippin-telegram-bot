@@ -25,7 +25,7 @@ def handle_trip_selection(update: Update, context: CallbackContext):
                 # Invalid selection
                 trips_ref = get_trips_ref(user_id)
                 trips_doc = trips_ref.get()
-                trips = trips_doc.to_dict().get("trips", {})
+                trips = trips_doc.to_dict()
                 trip_buttons = [[InlineKeyboardButton(trip, callback_data=trip)] for trip in trips]
                 trip_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])  # Cancel button
 
@@ -55,13 +55,13 @@ def handle_trip_creation(update: Update, context: CallbackContext):
         
         initialise_trips(user_id)
         # initialise_gcs_folder(user_id, trip_uuid)
-        trips = trips_ref.get().to_dict().get('trips')
+        trips = trips_ref.get().to_dict()
         if not trips.get(trip_name, False):
             trips[trip_name] = {
                 "uuid": trip_uuid,
                 "num_people": int(trip_details[1])
             }
-            trips_ref.update({"trips": trips})
+            trips_ref.update(trips)
             update_user_uploads(user_id, True)
             update_selected_trip(user_id, trip_name)
             initialise_trip_information(user_id, trip_name)
