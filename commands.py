@@ -6,6 +6,7 @@ from db_functions import update_user_uploads, get_trips_ref, user_initialised
 # Telegram bot command handlers
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Welcome! Please run the /create_trip command to begin your journey in tracking your itinerary!")
+    return ConversationHandler.END
 
 
 def upload_documents(update: Update, context: CallbackContext) -> None:
@@ -15,6 +16,7 @@ def upload_documents(update: Update, context: CallbackContext) -> None:
 
     update_user_uploads(user_id, True)
     update.message.reply_text("Upload has been enabled! you can upload your travel document invoices or booking confirmation in PDF or image files to track your purchases.")
+    return ConversationHandler.END
 
 def cancel_upload(update: Update, context: CallbackContext) -> None:
     user_id = str(update.message.from_user.id)
@@ -22,6 +24,7 @@ def cancel_upload(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("Error, unable to cancel as you have not created or selected your trip")
     update_user_uploads(user_id, False)
     update.message.reply_text("Upload mode canceled. Type /upload_documents to start again.")
+    return ConversationHandler.END
 
 
 def select_trip_command(update: Update, context: CallbackContext):
