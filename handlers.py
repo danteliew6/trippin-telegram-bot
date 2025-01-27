@@ -50,7 +50,7 @@ def handle_trip_creation(update: Update, context: CallbackContext):
                 "num_people": int(trip_details[1])
             }
             trips_ref.update({"trips": trips})
-            update_user_uploads(user_id)
+            update_user_uploads(user_id, True)
             update_selected_trip(user_id, trip_name)
             initialise_trip_information(user_id)
 
