@@ -15,8 +15,8 @@ select_trip_handler = ConversationHandler(
         states={
             states['SELECTING_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_selection)],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
-        run_async=True
+        fallbacks=[CommandHandler("cancel", cancel)]
+        # run_async=True
     )
 dispatcher.add_handler(select_trip_handler)
 
@@ -25,8 +25,8 @@ create_trip_handler = ConversationHandler(
         states={
             states['CREATE_TRIP']: [MessageHandler(Filters.text & ~Filters.command, handle_trip_creation)],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
-        run_async=True
+        fallbacks=[CommandHandler("cancel", cancel)]
+        # run_async=True
     )
 dispatcher.add_handler(create_trip_handler)
 
