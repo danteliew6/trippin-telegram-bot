@@ -30,7 +30,7 @@ def get_upload_mode(user_id):
 def get_trip_uuid(user_id, selected_trip):
     trips_ref = db.collection("trips").document(user_id)
     doc = trips_ref.get().to_dict()
-    return doc[selected_trip]['uuid']
+    return doc['trips'][selected_trip]['uuid']
 
 def initialise_trips(user_id):
     trips_ref = db.collection("trips").document(user_id)
