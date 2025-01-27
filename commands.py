@@ -48,7 +48,7 @@ def select_trip_command(update: Update, context: CallbackContext):
         # Display trips as a list
         trip_list = "\n".join([f"{i+1}. {key}: {value['num_people']} Pax" for i, (key, value) in enumerate(trips.items())])
         trip_buttons = [[InlineKeyboardButton(trip, callback_data=trip)] for trip in trips]
-        trip_buttons.append(InlineKeyboardButton("Cancel", callback_data="cancel"))  # Cancel button
+        trip_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])  # Cancel button
         update.message.reply_text(
             f"Please select a trip:\n\n{trip_list}",
             reply_markup=InlineKeyboardMarkup(trip_buttons, one_time_keyboard=True)
@@ -75,5 +75,5 @@ def create_trip_command(update: Update, context: CallbackContext):
     update.message.reply_text("To start creating, we will require some details from you:\
                               \n\n 1. Name/Title of the trip\n 2. Number of people going on the trip \
                               \n\n Please enter the details separated by a comma (e.g. Australia,2)",\
-                            reply_markup=InlineKeyboardMarkup(InlineKeyboardButton("Cancel", callback_data="cancel"), one_time_keyboard=True))
+                            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Cancel", callback_data="cancel")]]))
     return states['CREATE_TRIP']
