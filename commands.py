@@ -72,8 +72,8 @@ def cancel(update: Update, context: CallbackContext):
 
 def create_trip_command(update: Update, context: CallbackContext):
     print('Creating trip....')
-    update.message.reply_text(
-        "To start creating, we will require some details from you:\n\n 1. Name/Title of the trip\n 2. Number of people going on the trip \n\n Please enter the details separated by a comma (e.g. Australia,2)",
-        reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Cancel", callback_data="cancel")], one_time_keyboard=True)
-    )
+    update.message.reply_text("To start creating, we will require some details from you:\
+                              \n\n 1. Name/Title of the trip\n 2. Number of people going on the trip \
+                              \n\n Please enter the details separated by a comma (e.g. Australia,2)",\
+                            reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Cancel", callback_data="cancel")], one_time_keyboard=True))
     return states['CREATE_TRIP']
