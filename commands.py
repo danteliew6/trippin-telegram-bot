@@ -50,7 +50,7 @@ def select_trip_command(update: Update, context: CallbackContext):
         trip_buttons = [[InlineKeyboardButton(trip, callback_data=trip)] for trip in trips]
         trip_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])  # Cancel button
         update.message.reply_text(
-            f"Please select a trip by replying with the name:\n\n{trip_list}",
+            f"Please select a trip:\n\n{trip_list}",
             reply_markup=InlineKeyboardMarkup(trip_buttons, one_time_keyboard=True)
         )
 
@@ -64,19 +64,16 @@ def select_trip_command(update: Update, context: CallbackContext):
 
 
 def cancel(update: Update, context: CallbackContext):
-    update.message.reply_text("Conversation canceled.")
+    """Handle cancel action triggered by the cancel button."""
+    query = update.callback_query
+    query.answer()  # Acknowledge the callback
+    query.edit_message_text("❌ You have canceled the action.")
     return ConversationHandler.END
 
 def create_trip_command(update: Update, context: CallbackContext):
     print('Creating trip....')
-    update.message.reply_text("""
-    To start creating, we will require some details from you:
-
-    1. Name/Title of the trip
-    2. Number of people going on the trip
-
-    Please enter the details separated by a comma (e.g. "Australia,2")
-    """,
-    reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Cancel", callback_data="cancel")], one_time_keyboard=True)
+    update.message.reply_text(
+        "To start creating, we will require some details from you:\n\n 1. Name/Title of the trip\n 2. Number of people going on the trip \n\n Please enter the details separated by a comma (e.g. Australia,2)",
+        reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Cancel", callback_data="cancel")], one_time_keyboard=True)
     )
     return states['CREATE_TRIP']
