@@ -10,9 +10,9 @@ import google.generativeai as genai
 
 load_dotenv()
 states = {
-    "CREATE_TRIP": 1,
-    "GATHER_TRIP_INFO": 2,
-    "SELECTING_TRIP": 3
+    "CREATE_TRIP": "1",
+    "GATHER_TRIP_INFO": "2",
+    "SELECTING_TRIP": "3"
 }
 
 # Set up logging

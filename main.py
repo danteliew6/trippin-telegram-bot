@@ -24,6 +24,7 @@ def telegram_webhook(request):
                 fallbacks=[CommandHandler("cancel", cancel)],
                 run_async=True
             )
+        dispatcher.add_handler(select_trip_handler)
         
         create_trip_handler = ConversationHandler(
                 entry_points=[CommandHandler("create_trip", create_trip_command)],
@@ -34,7 +35,6 @@ def telegram_webhook(request):
                 run_async=True
             )
         dispatcher.add_handler(create_trip_handler)
-        dispatcher.add_handler(select_trip_handler)
 
         dispatcher.add_handler(CommandHandler("upload_documents", upload_documents))
         dispatcher.add_handler(CommandHandler("cancel_upload", cancel_upload))
