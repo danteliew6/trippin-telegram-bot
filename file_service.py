@@ -60,8 +60,10 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
         category = data['args']['category']
         info_path = [selected_trip, category]
         transaction.update(
-            trips_info_ref, 
-            {FieldPath(*info_path): firestore.ArrayUnion([combined_data])}
+            trips_info_ref,
+            {
+                f"{selected_trip}.{category}": firestore.ArrayUnion([combined_data])
+            }
         )
         transaction.commit()
         return trips_info_ref.get().to_dict()
