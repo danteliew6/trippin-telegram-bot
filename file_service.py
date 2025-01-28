@@ -2,7 +2,6 @@ from config import db, genai
 from gemini_protos_schema import extract_travel_document_data
 from google.cloud import firestore
 from db_functions import get_trips_info_ref, get_selected_trip, get_upload_mode, get_trip_uuid
-from google.cloud.firestore_v1.field_path import FieldPath
 # Upload file to Google Drive
 # def upload_to_google_drive(file_path: str, file_name: str) -> str:
 #     file_metadata = {"name": file_name, "parents": [FOLDER_ID]}
@@ -76,7 +75,7 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
 def generate_summary_message(user_id: str) -> str:
     trips_info_ref = get_trips_info_ref(user_id)
     selected_trip = get_selected_trip(user_id)
-    current_items = trips_info_ref.get(selected_trip, {})
+    current_items = trips_info_ref.get().to_dict().get(selected_trip, {})
     # Initialize variables for the formatted output and grand total
     formatted_output = 'Below is the updated summary of your trip items \n'
     grand_total = 0
