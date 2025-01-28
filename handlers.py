@@ -148,8 +148,8 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
             raise Exception("Failed to add extracted data to the database.")
         
         update.message.reply_text("Data successfully added to the database!")
-        # formatted_summary_message = generate_summary_message(user_id)
-        # update.message.reply_text(formatted_summary_message)
+        formatted_summary_message = generate_summary_message(user_id)
+        update.message.reply_text(formatted_summary_message)
 
     except Exception as e:
         # Rollback if any step fails

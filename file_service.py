@@ -75,7 +75,9 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
 def generate_summary_message(user_id: str) -> str:
     trips_info_ref = get_trips_info_ref(user_id)
     selected_trip = get_selected_trip(user_id)
-    current_items = trips_info_ref.get().to_dict().get(selected_trip, {})
+    current_items = trips_info_ref.get().to_dict()
+    current_items = current_items.get(selected_trip)
+    print(current_items)
     # Initialize variables for the formatted output and grand total
     formatted_output = 'Below is the updated summary of your trip items \n'
     grand_total = 0
