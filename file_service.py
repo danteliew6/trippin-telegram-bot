@@ -59,7 +59,7 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
         transaction = db.transaction()
         category = data['args']['category']
         info_path = f"{selected_trip}.{category}"
-        transaction.update(trips_info_ref, {FieldPath(info_path): firestore.ArrayUnion([combined_data])})
+        transaction.update(trips_info_ref, {FieldPath(info_path).to_api_repr(): firestore.ArrayUnion([combined_data])})
 
         return trips_info_ref.get().to_dict()
     except Exception as e:
