@@ -40,7 +40,7 @@ def upload_to_gemini(file_path: str, file_name: str) -> dict:
         response = model.generate_content(
             ["Please extract the data from this document. For any dates being extracted, ensure it follows the format DD-MM-YYYY. For dates without year provided, use DD-MM only. Purchase date should be blank if not specified", uploaded_file],
             tool_config={'function_calling_config':'ANY'},
-            generation_config=genai.GenerationConfig(temperature=0.1, response_mime_type='application/json', candidate_count=1)
+            generation_config=genai.GenerationConfig(temperature=0.1, candidate_count=1)
         )
 
         fc = response.candidates[0].content.parts[0].function_call
@@ -78,10 +78,9 @@ def generate_summary_message(user_id: str) -> str:
     selected_trip = get_selected_trip(user_id)
     current_items = trips_info_ref.get().to_dict()
     current_items = current_items.get(selected_trip)
-    print(current_items)
     # Initialize variables for the formatted output and grand total
     formatted_output = 'Below is the updated summary of your trip items \n'
-    grand_total = 0
+    grand_total = {}
 
     # Iterate over the categories in default_schema
     for category, items in current_items.items():
@@ -89,24 +88,31 @@ def generate_summary_message(user_id: str) -> str:
         formatted_output += f"{category}:\n"
 
         # Initialize category total
-        category_total = 0
+        category_total = {}
 
         # Iterate over items in the category
         for index, item in enumerate(items, start=1):
             # Format the item string
-            item_string = f"  {index}. {item['item_name']} - {item['price']}"
+            item_string = f"  {index}. {item['item_name']} - {item['currency']} {item['price']}"
             formatted_output += item_string + "\n"
 
             # Add the price to the category total
-            category_total += item['price']
+            category_total[item['currency']] = category_total.get(item['currency'], 0) + item['price']
+        
+        if category_total:
+            # Add category total to the output
+            formatted_output += f"  Total for {category}: \n"
+            for currency, total in category_total.items():
+                formatted_output += f"  {currency} - {round(total,2)} \n"
+                grand_total[currency] = grand_total.get(currency, 0) + total
+            formatted_output += '\n'
+        else:
+            formatted_output += f"  No items added for this category yet. \n\n"
 
-        # Add category total to the output
-        formatted_output += f"  Total for {category}: {category_total}\n\n"
-
-        # Add category total to the grand total
-        grand_total += category_total
 
     # Add the grand total to the output
-    formatted_output += f"Grand Total: {grand_total}"
+    formatted_output += "Grand Total: \n"
+    for currency, total in grand_total.items():
+        formatted_output += f"  {currency} - {round(total,2)} \n"
 
     return formatted_output
