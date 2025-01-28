@@ -6,7 +6,7 @@ from file_service import add_file_info_to_database, generate_summary_message, up
 from gcs_utils import check_folder_exists
 from utils import generate_file_uuid, generate_trip_uuid
 from db_functions import get_selected_trip, get_trips_ref, get_upload_mode, update_selected_trip, update_user_uploads, initialise_trips, initialise_trip_information, get_trip_uuid
-from gcs_utils import upload_blob
+from gcs_utils import upload_blob, delete_blob
     
 
 def handle_trip_selection(update: Update, context: CallbackContext):
@@ -115,28 +115,26 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
     # Download the file locally
     # local_file_path = f"temp_{}"
     local_file_path = f"{generate_file_uuid()}{file_extension}"
-    file_obj = context.bot.get_file(file_id)
-    file_obj.download(local_file_path)
+    try:
+        file_obj = context.bot.get_file(file_id)
+        file_obj.download(local_file_path)
 
-    selected_trip = get_selected_trip(user_id)
-    trip_uuid = get_trip_uuid(user_id, selected_trip)
-    
-    destination_blob_name = f"{user_id}/{trip_uuid}/{local_file_path}"
-    print(destination_blob_name)
-    is_uploaded = upload_blob(TRAVEL_FILE_BUCKET_NAME, local_file_path, destination_blob_name)
+        selected_trip = get_selected_trip(user_id)
+        trip_uuid = get_trip_uuid(user_id, selected_trip)
+        
+        destination_blob_name = f"{user_id}/{trip_uuid}/{local_file_path}"
+        is_uploaded = upload_blob(TRAVEL_FILE_BUCKET_NAME, local_file_path, destination_blob_name)
 
-    if not is_uploaded:
-        update.message.reply_text("Failed to upload file.")
-        return ConversationHandler.END
-    
-    update.message.reply_text("File uploaded.")
-    # Send the file to Gemini API
-    extracted_data = upload_to_gemini(local_file_path, file_name)
-    os.remove(local_file_path)  # Clean up local file
-
+        if not is_uploaded:
+            raise Exception("Failed to upload file.")
+        
+        update.message.reply_text("File uploaded.")
+        # Send the file to Gemini API
+        extracted_data = upload_to_gemini(local_file_path, file_name)
+        if not extracted_data:
+            raise Exception("Failed to process the file. Please try again.")
 
 
-    if extracted_data:
         update.message.reply_text("File processed successfully! Adding data to the database...")
         # Append the extracted data to DB
         file_info = {
@@ -145,11 +143,27 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
             "destination_blob_name": destination_blob_name
         }
         current_items = add_file_info_to_database(extracted_data, user_id, file_info)
-        if current_items:
-            update.message.reply_text("Data successfully added to the database!")
-            formatted_summary_message = generate_summary_message(user_id)
-            update.message.reply_text(formatted_summary_message)
-        else:
-            update.message.reply_text("Failed to upload data to database. Please try again.")
-    else:
-        update.message.reply_text("Failed to process the file. Please try again.")
+        if not current_items:
+            raise Exception("Failed to add extracted data to the database.")
+        
+        update.message.reply_text("Data successfully added to the database!")
+        formatted_summary_message = generate_summary_message(user_id)
+        update.message.reply_text(formatted_summary_message)
+
+    except Exception as e:
+        # Rollback if any step fails
+        print(f"Error: {e}")
+        update.message.reply_text(f"An error occurred: {e}. Rolling back...")
+        
+        # Attempt to delete the uploaded file from Cloud Storage if it exists
+        try:
+            delete_blob(TRAVEL_FILE_BUCKET_NAME, destination_blob_name)
+            print(f"Rolled back uploaded file: {destination_blob_name}")
+        except Exception as delete_error:
+            print(f"Failed to delete uploaded file during rollback: {delete_error}")
+
+    finally:
+        # Clean up the local file
+        if os.path.exists(local_file_path):
+            os.remove(local_file_path)
+            print(f"Cleaned up local file: {local_file_path}")

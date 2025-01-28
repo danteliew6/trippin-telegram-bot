@@ -1,10 +1,9 @@
 from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, Filters, Dispatcher, ConversationHandler, CallbackQueryHandler
 from config import bot, states
-from file_service import handle_file_upload
 # from purchase_service import add_purchase
 from commands import start, upload_documents, cancel_upload, select_trip_command, cancel, create_trip_command
-from handlers import handle_trip_selection, handle_trip_creation
+from handlers import handle_trip_selection, handle_trip_creation, handle_file_upload
 
 
 dispatcher = Dispatcher(bot, None, workers=1)

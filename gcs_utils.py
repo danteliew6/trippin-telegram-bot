@@ -110,3 +110,31 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
             f"Error uploading file {source_file_name}: {e}"
         )
         return False
+
+def delete_blob(bucket_name: str, blob_name: str) -> bool:
+    """
+    Deletes a blob (file) from the specified Google Cloud Storage bucket.
+
+    Args:
+        bucket_name (str): The name of the GCS bucket.
+        blob_name (str): The path to the file (blob) in the bucket.
+
+    Returns:
+        bool: True if the file was deleted successfully, False otherwise.
+    """
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+
+        # Check if the blob exists before attempting to delete
+        if blob.exists():
+            blob.delete()
+            print(f"Blob '{blob_name}' deleted from bucket '{bucket_name}'.")
+            return True
+        else:
+            print(f"Blob '{blob_name}' does not exist in bucket '{bucket_name}'.")
+            return False
+    except Exception as e:
+        print(f"Error deleting blob '{blob_name}' from bucket '{bucket_name}': {e}")
+        return False
