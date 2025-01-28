@@ -60,7 +60,7 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
         category = data['args']['category']
         current_trip_info_data = trips_info_ref.get().to_dict()[selected_trip][category]
         current_trip_info_data.append(combined_data)
-        info_path = f'{selected_trip}.{category}'
+        info_path = f'`{selected_trip}`.`{category}`'
         transaction.set(
             trips_info_ref,
             {
