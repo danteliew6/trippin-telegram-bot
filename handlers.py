@@ -158,6 +158,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         # Attempt to delete the uploaded file from Cloud Storage if it exists
         try:
             delete_blob(TRAVEL_FILE_BUCKET_NAME, destination_blob_name)
+            #TODO: REMOVE FIRESTORE DATA AS WELL
             print(f"Rolled back uploaded file: {destination_blob_name}")
         except Exception as delete_error:
             print(f"Failed to delete uploaded file during rollback: {delete_error}")
