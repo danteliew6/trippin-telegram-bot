@@ -58,15 +58,18 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
         combined_data = common_data | category_data | file_info
         transaction = db.transaction()
         category = data['args']['category']
+        current_trip_info_data = trips_info_ref.get().to_dict()[selected_trip]
+        current_trip_info_data.append(combined_data)
         info_path = f'{selected_trip}.{category}'
-        transaction.update(
+        transaction.set(
             trips_info_ref,
             {
-                [info_path]: firestore.ArrayUnion([combined_data])
-            }
+                info_path: current_trip_info_data
+            },
+            merge=True
         )
         transaction.commit()
-        return trips_info_ref.get().to_dict()
+        return current_trip_info_data
     except Exception as e:
         print(f"Error adding to database: {e}")
         return None
