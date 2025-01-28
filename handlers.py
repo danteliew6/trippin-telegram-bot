@@ -134,7 +134,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         if not extracted_data:
             raise Exception("Failed to process the file. Please try again.")
 
-
+        print(extracted_data)
         update.message.reply_text("File processed successfully! Adding data to the database...")
         # Append the extracted data to DB
         file_info = {
@@ -142,6 +142,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
             "file_extension": file_extension,
             "destination_blob_name": destination_blob_name
         }
+        
         current_items = add_file_info_to_database(extracted_data, user_id, file_info)
 
         if not current_items:
