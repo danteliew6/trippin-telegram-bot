@@ -98,7 +98,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
     # Check if the user is in "upload mode"
     if not get_upload_mode(user_id):
         update.message.reply_text("Please use /upload_documents before uploading a file.")
-        return
+        return ConversationHandler.END
     
     file = update.message.document or update.message.photo[-1]
 
@@ -110,7 +110,7 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
     # Validate file type
     if file_extension not in [".pdf", ".png", ".jpeg", ".webp", ".heic", ".heif"]:
         update.message.reply_text("Unsupported file type! Please upload a PDF file or a valid image file.")
-        return
+        return ConversationHandler.END
 
     # Download the file locally
     # local_file_path = f"temp_{}"
@@ -169,3 +169,4 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         if os.path.exists(local_file_path):
             os.remove(local_file_path)
             print(f"Cleaned up local file: {local_file_path}")
+        return ConversationHandler.END

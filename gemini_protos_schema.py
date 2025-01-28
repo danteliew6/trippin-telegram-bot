@@ -5,7 +5,7 @@ import textwrap
 common_data = genai.protos.Schema(
     type=genai.protos.Type.OBJECT,
     properties={
-        'item_name': genai.protos.Schema(type=genai.protos.Type.STRING, description="The name of the item."),
+        'item_name': genai.protos.Schema(type=genai.protos.Type.STRING, description="The name of the item. For these categories, follow the pattern specified: Hotel items must be hotel name, Flights must be airline name and flight number, Transport must be company and type, Rentals must be the rental company name and pick up location)"),
         'price': genai.protos.Schema(type=genai.protos.Type.NUMBER, description="The price of the item."),
         'currency': genai.protos.Schema(type=genai.protos.Type.STRING, description="The currency used for this purchase. If not specified, should be defaulted to SGD"),
         'date_of_purchase': genai.protos.Schema(type=genai.protos.Type.STRING, description="The date of purchase. If not specified, use current date"),
