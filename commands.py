@@ -1,7 +1,8 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ConversationHandler
+from telegram import ParseMode
 from config import states
-from db_functions import update_user_uploads, get_trips_ref, user_initialised
+from db_functions import update_user_uploads, get_trips_ref, user_initialised, get_selected_trip
 
 # Telegram bot command handlers
 def start(update: Update, context: CallbackContext) -> None:
@@ -72,3 +73,31 @@ def create_trip_command(update: Update, context: CallbackContext):
                               \n\n Please enter the details separated by a comma (e.g. Australia,2)",\
                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Cancel", callback_data="cancel")]]))
     return states['CREATE_TRIP']
+
+
+def trip_info_command(update: Update, context: CallbackContext):
+    print('Getting trip summary....')
+    user_id = str(update.message.from_user.id)
+    formatted_msg = "This is the current summary of all the items added for your trip: \n\n"
+    trips_info_ref = get_trips_ref(user_id)
+    selected_trip = get_selected_trip(user_id)
+    doc = trips_info_ref.get().to_dict()
+    trips_info_dict = doc.get(selected_trip, {})
+    for category, items in trips_info_dict.items():
+        formatted_msg += f'*{category}*\n'
+        for i in range(len(items)):
+            item_name = items[i].get('item_name', 'No Item Name')
+            price = items[i].get('price', 'No Price Added')
+            currency = items[i].get('currency', 'No Currency Specified')
+            formatted_msg += f'{i+1}: {item_name} - {currency} {price}\n'
+        formatted_msg += '\n'
+
+    update.message.reply_text(formatted_msg, parse_mode=ParseMode.MARKDOWN_V2)
+
+    update.message.reply_text("To get more information on specific items or if you would like to modify your trip information, please press the respective button below.",
+                            reply_markup=InlineKeyboardMarkup([
+                                [InlineKeyboardButton("Get Item Info", callback_data="GET_ITEM_INFO")],
+                                [InlineKeyboardButton("Modify or Delete Item Info", callback_data="MODIFY_ITEM_INFO")],
+                                [InlineKeyboardButton("Cancel", callback_data="cancel")],
+                                ]))
+    return states['HANDLE_TRIP_INFO_SELECTION']

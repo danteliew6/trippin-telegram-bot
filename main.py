@@ -2,8 +2,8 @@ from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, Filters, Dispatcher, ConversationHandler, CallbackQueryHandler
 from config import bot, states
 # from purchase_service import add_purchase
-from commands import start, upload_documents, cancel_upload, select_trip_command, cancel, create_trip_command
-from handlers import handle_trip_selection, handle_trip_creation, handle_file_upload
+from commands import start, trip_info_command, upload_documents, cancel_upload, select_trip_command, cancel, create_trip_command
+from handlers import handle_get_item_info, handle_show_item_info, handle_trip_info_selection, handle_trip_selection, handle_trip_creation, handle_file_upload
 
 
 dispatcher = Dispatcher(bot, None, workers=1)
@@ -35,6 +35,32 @@ create_trip_handler = ConversationHandler(
         # run_async=True
     )
 dispatcher.add_handler(create_trip_handler)
+
+trip_information_handler = ConversationHandler(
+        entry_points=[CommandHandler("trip_info", trip_info_command)],
+        states={
+            states['HANDLE_TRIP_INFO_SELECTION']: [
+                CallbackQueryHandler(handle_trip_info_selection),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),  # Handle "Cancel" button clicks
+                ],
+            states['GET_ITEM_INFO']: [
+                CallbackQueryHandler(handle_get_item_info),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),  # Handle "Cancel" button clicks
+                ],
+            states['SHOW_ITEM_INFO']: [
+                CallbackQueryHandler(handle_show_item_info),
+                CallbackQueryHandler(cancel, pattern="^cancel$"),  # Handle "Cancel" button clicks
+                ],
+            # TODO: Future Tasks for Modify Trip, Delete Trip, Trip Summary ETC
+            # states['MODIFY_TRIP_INFO']: [
+            #     CallbackQueryHandler(handle_modify_trip_info),
+            #     CallbackQueryHandler(cancel, pattern="^cancel$"),  # Handle "Cancel" button clicks
+            #     ],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)]
+        # run_async=True
+    )
+dispatcher.add_handler(trip_information_handler)
 
 dispatcher.add_handler(CommandHandler("upload_documents", upload_documents))
 dispatcher.add_handler(CommandHandler("cancel_upload", cancel_upload))

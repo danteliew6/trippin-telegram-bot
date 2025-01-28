@@ -170,3 +170,59 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
             os.remove(local_file_path)
             print(f"Cleaned up local file: {local_file_path}")
         return ConversationHandler.END
+    
+
+# Handler to select trip info state to route to
+def handle_trip_info_selection(update: Update, context: CallbackContext):
+    query = update.callback_query
+    if query:
+        query.answer()
+        return states[query.data] 
+    
+def handle_get_item_info(update: Update, context: CallbackContext):
+    query = update.callback_query
+    if query:
+        query.answer()
+        user_id = str(query.from_user.id)
+        trips_ref = get_trips_ref(user_id)
+        selected_trip = get_selected_trip(user_id)
+        query.edit_message_text(f"Let's get your trip item info!")
+
+        doc = trips_ref.get().to_dict()
+        trip_items = doc.get(selected_trip, {})
+        if not trip_items:
+            update.message.reply_text("You have no items added yet, please upload an item first.")
+            return ConversationHandler.END
+        
+        reply_buttons = []
+        for category, items in trip_items.items():
+            for index, item_info in enumerate(items):
+                reply_buttons.append([InlineKeyboardButton(f"({category}) {index}: {item_info['item_name']}", callback_data=f"{category},{index}")])
+        reply_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])
+        update.message.reply_text("Please select the item.",
+                        reply_markup=InlineKeyboardMarkup(reply_buttons))
+        return states['SHOW_ITEM_INFO']
+    else:
+        # Fallback for unexpected input (just in case)
+        update.message.reply_text("Invalid input. Please try again.")
+        return states['GET_ITEM_INFO']
+
+def handle_show_item_info(update: Update, context: CallbackContext):
+    query = update.callback_query
+    try:
+        if query:
+            query.answer()
+            user_id = str(query.from_user.id)
+            trips_ref = get_trips_ref(user_id)
+            selected_trip = get_selected_trip(user_id)
+            query.edit_message_text(f"✅ Item Selected")
+            category, index = query.data.split(',')
+            doc = trips_ref.get().to_dict()
+            trip_items = doc.get(selected_trip, {})
+            item_info = trip_items[category][int(index)]
+            update.message.reply_text(str(item_info))
+    except Exception as e:
+        print(f'Error:{e}')
+        update.message.reply_text("Unknown Error, please try again.")
+    finally:
+        return ConversationHandler.END

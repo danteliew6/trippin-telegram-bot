@@ -12,7 +12,11 @@ load_dotenv()
 states = {
     "CREATE_TRIP": "1",
     "GATHER_TRIP_INFO": "2",
-    "SELECTING_TRIP": "3"
+    "SELECTING_TRIP": "3",
+    "HANDLE_TRIP_INFO_SELECTION": "4",
+    "GET_ITEM_INFO": "5",
+    "MODIFY_ITEM_INFO": "6",
+    "SHOW_ITEM_INFO": "7",
 }
 
 # Set up logging
