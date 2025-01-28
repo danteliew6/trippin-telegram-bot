@@ -58,19 +58,17 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
         combined_data = common_data | category_data | file_info
         transaction = db.transaction()
         category = data['args']['category']
-        current_trip_info_data = trips_info_ref.get().to_dict()[selected_trip][category]
-        current_trip_info_data.append(combined_data)
-        field_path = FieldPath(selected_trip, category)
+        all_trip_info_data = trips_info_ref.get().to_dict()
+        all_trip_info_data[selected_trip][category].append(combined_data)
+        
 
         transaction.set(
             trips_info_ref,
-            {
-                field_path : current_trip_info_data
-            },
+            all_trip_info_data,
             merge=True
         )
         transaction.commit()
-        return current_trip_info_data
+        return all_trip_info_data[selected_trip]
     except Exception as e:
         print(f"Error adding to database: {e}")
         return None
