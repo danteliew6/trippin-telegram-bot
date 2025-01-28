@@ -39,7 +39,8 @@ def upload_to_gemini(file_path: str, file_name: str) -> dict:
         model = genai.GenerativeModel("gemini-1.5-flash", tools=[extract_travel_document_data])
         response = model.generate_content(
             ["Please extract the data from this document. For any dates being extracted, ensure it follows the format DD-MM-YYYY. For dates without year provided, use DD-MM only. Purchase date should be blank if not specified", uploaded_file],
-            tool_config={'function_calling_config':'ANY'}
+            tool_config={'function_calling_config':'ANY'},
+            generation_config=genai.GenerationConfig(temperature=0.1, response_mime_type='application/json', candidate_count=1)
         )
 
         fc = response.candidates[0].content.parts[0].function_call

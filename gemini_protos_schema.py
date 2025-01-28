@@ -34,10 +34,10 @@ category_data = genai.protos.Schema(
         "room_type": genai.protos.Schema(type=genai.protos.Type.STRING, description="Type of room for hotels."),
 
         # Flights
-        "departure_date": genai.protos.Schema(type=genai.protos.Type.STRING, description="Flight departure date."),
-        "return_date": genai.protos.Schema(type=genai.protos.Type.STRING, description="Flight return date, if applicable."),
-        "departure_airport": genai.protos.Schema(type=genai.protos.Type.STRING, description="Departure airport."),
-        "arrival_airport": genai.protos.Schema(type=genai.protos.Type.STRING, description="Arrival airport."),
+        "departure_datetime": genai.protos.Schema(type=genai.protos.Type.STRING, description="Flight departure date and time."),
+        "arrival_datetime": genai.protos.Schema(type=genai.protos.Type.STRING, description="Flight arrival date and time."),
+        "departure_airport": genai.protos.Schema(type=genai.protos.Type.STRING, description="Departure airport and boarding terminal."),
+        "arrival_airport": genai.protos.Schema(type=genai.protos.Type.STRING, description="Arrival airport and boarding terminal."),
         "airline": genai.protos.Schema(type=genai.protos.Type.STRING, description="Airline name."),
         "flight_number": genai.protos.Schema(type=genai.protos.Type.STRING, description="Flight number."),
 
@@ -52,11 +52,17 @@ category_data = genai.protos.Schema(
         "rental_end_date": genai.protos.Schema(type=genai.protos.Type.STRING, description="Rental end date."),
         "rental_company": genai.protos.Schema(type=genai.protos.Type.STRING, description="Rental company name."),
         "rental_vehicle_type": genai.protos.Schema(type=genai.protos.Type.STRING, description="Type of rented vehicle."),
+        "pickup_location": genai.protos.Schema(type=genai.protos.Type.STRING, description="Specified address to pick up the car."),
+        "dropoff_location": genai.protos.Schema(type=genai.protos.Type.STRING, description="Specified address to return the car after rental."),
+        "pickup_instructions": genai.protos.Schema(type=genai.protos.Type.STRING, description="Instructions and steps to pick up the car, if any."),
+        "dropoff_instructions": genai.protos.Schema(type=genai.protos.Type.STRING, description="Instructions and steps in returning the car, if any."),
+        
 
         # Activities
         "activity_date": genai.protos.Schema(type=genai.protos.Type.STRING, description="Date of the activity."),
         "activity_type": genai.protos.Schema(type=genai.protos.Type.STRING, description="Type of activity."),
         "provider": genai.protos.Schema(type=genai.protos.Type.STRING, description="Provider of the activity."),
+        "description": genai.protos.Schema(type=genai.protos.Type.STRING, description="Description of the activity."),
 
         # Insurance
         "policy_number": genai.protos.Schema(type=genai.protos.Type.STRING, description="Insurance policy number."),
