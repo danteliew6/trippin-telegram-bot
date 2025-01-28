@@ -49,14 +49,26 @@ def upload_to_gemini(file_path: str, file_name: str) -> dict:
         print(f"Error uploading to Gemini API: {e}")
         return None
 
-def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict:
+def add_file_info_to_database(transaction, data: dict, user_id: str, file_info: dict) -> dict:
     try:
         trips_info_ref = get_trips_info_ref(user_id)
         selected_trip = get_selected_trip(user_id)
         common_data = data['args']['common_data']
         category_data = data['args']['category_data']
         combined_data = common_data | category_data | file_info
-        trips_info_ref.update({selected_trip: {data['args']['category']: firestore.ArrayUnion([combined_data])}})
+
+        snapshot = transaction.get(trips_info_ref)
+        current_data = snapshot.to_dict() or {}
+        if selected_trip not in current_data:
+            current_data[selected_trip] = {}
+
+        category = data['args']['category']
+        if category not in current_data[selected_trip]:
+            current_data[selected_trip][category] = []
+
+        current_data[selected_trip][category].append(combined_data)
+        transaction.set(trips_info_ref, current_data)
+
         return trips_info_ref.get().to_dict()
     except Exception as e:
         print(f"Error adding to database: {e}")

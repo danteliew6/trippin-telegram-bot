@@ -142,7 +142,12 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
             "file_extension": file_extension,
             "destination_blob_name": destination_blob_name
         }
-        current_items = add_file_info_to_database(extracted_data, user_id, file_info)
+        # Use Firestore transaction to update the database
+        def transaction_callback(transaction):
+            return add_file_info_to_database(transaction, extracted_data, user_id, file_info)
+
+        current_items = db.transaction(transaction_callback)
+        
         if not current_items:
             raise Exception("Failed to add extracted data to the database.")
         
@@ -152,13 +157,12 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
 
     except Exception as e:
         # Rollback if any step fails
-        print(f"Error: {e}")
+        print(f"Error: Upload failed, please try again.")
         update.message.reply_text(f"An error occurred: {e}. Rolling back...")
         
         # Attempt to delete the uploaded file from Cloud Storage if it exists
         try:
             delete_blob(TRAVEL_FILE_BUCKET_NAME, destination_blob_name)
-            #TODO: REMOVE FIRESTORE DATA AS WELL
             print(f"Rolled back uploaded file: {destination_blob_name}")
         except Exception as delete_error:
             print(f"Failed to delete uploaded file during rollback: {delete_error}")
