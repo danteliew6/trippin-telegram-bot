@@ -2,7 +2,7 @@ from config import db, genai
 from gemini_protos_schema import extract_travel_document_data
 from google.cloud import firestore
 from db_functions import get_trips_info_ref, get_selected_trip, get_upload_mode, get_trip_uuid
-from google.cloud.firestore_v1 import field_path
+from google.cloud.firestore_v1.field_path import FieldPath
 # Upload file to Google Drive
 # def upload_to_google_drive(file_path: str, file_name: str) -> str:
 #     file_metadata = {"name": file_name, "parents": [FOLDER_ID]}
@@ -60,12 +60,12 @@ def add_file_info_to_database(data: dict, user_id: str, file_info: dict) -> dict
         category = data['args']['category']
         current_trip_info_data = trips_info_ref.get().to_dict()[selected_trip][category]
         current_trip_info_data.append(combined_data)
-        info_path = f'`{selected_trip}`.`{category}`'
-        
+        field_path = FieldPath(selected_trip, category)
+
         transaction.set(
             trips_info_ref,
             {
-                field_path.get_field_path([selected_trip, category]): current_trip_info_data
+                field_path : current_trip_info_data
             },
             merge=True
         )
