@@ -142,12 +142,8 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
             "file_extension": file_extension,
             "destination_blob_name": destination_blob_name
         }
-        # Use Firestore transaction to update the database
-        def transaction_callback(transaction):
-            return add_file_info_to_database(transaction, extracted_data, user_id, file_info)
+        current_items = add_file_info_to_database(extracted_data, user_id, file_info)
 
-        current_items = db.transaction(transaction_callback)
-        
         if not current_items:
             raise Exception("Failed to add extracted data to the database.")
         
