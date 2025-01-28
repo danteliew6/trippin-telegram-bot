@@ -43,10 +43,10 @@ def upload_to_gemini(file_path: str, file_name: str) -> dict:
              For dates without year provided, use DD-MM only. \
              Purchase date should be blank if not specified.\
              For item_name field, return the following category values for the allocated category: \
-             Hotels item name must be hotel name + check-in date + check-out date.\
-             Rentals item name must be rental company name + rental pickup date.\
-             Flights item name must be airline company name + departure airport + flight number.\
-             Transport item name must be transport vehicle type + pickup location + datetime\
+             Hotels item name must be in this format: <hotel name> - <check-in date in DDMM> to <check-out date in DDMM>.\
+             Rentals item name must be in this format: <rental company name> - <rental pickup date>.\
+             Flights item name must be in this format: <airline company name> - <departure airport> (<flight number>).\
+             Transport item name must be in this format: <transport vehicle type> - <pickup location> at <datetime>\
              ", uploaded_file],
             tool_config={'function_calling_config':'ANY'},
             generation_config=genai.GenerationConfig(temperature=0.1)
