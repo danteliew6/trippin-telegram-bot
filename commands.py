@@ -39,11 +39,7 @@ def select_trip_command(update: Update, context: CallbackContext):
     # Fetch trips for the user
     trips_doc = trips_ref.get()
     if trips_doc.exists:
-        trips = trips_doc.to_dict().get("trips", {})
-        # TODO: MODIFY THIS TO DICT
-        if not trips:
-            update.message.reply_text("You don't have any trips yet! Create one using /create_trip.")
-            return ConversationHandler.END
+        trips = trips_doc.to_dict()
 
         # Display trips as a list
         trip_list = "\n".join([f"{i+1}. {key}: {value['num_people']} Pax" for i, (key, value) in enumerate(trips.items())])
