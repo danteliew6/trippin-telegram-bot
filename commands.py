@@ -84,6 +84,8 @@ def trip_info_command(update: Update, context: CallbackContext):
     doc = trips_info_ref.get().to_dict()
     trips_info_dict = doc.get(selected_trip, {})
     for category, items in trips_info_dict.items():
+        print(category)
+        print(items)
         formatted_msg += f'*{category}*\n'
         for i in range(len(items)):
             item_name = items[i].get('item_name', 'No Item Name')
