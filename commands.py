@@ -94,7 +94,7 @@ def trip_info_command(update: Update, context: CallbackContext):
             formatted_msg += f'{i+1}: {item_name} - {currency} {price}\n'
         formatted_msg += '\n'
 
-    update.message.reply_text(formatted_msg, parse_mode=ParseMode.MARKDOWN_V2)
+    update.message.reply_text(formatted_msg)
 
     update.message.reply_text("To get more information on specific items or if you would like to modify your trip information, please press the respective button below.",
                             reply_markup=InlineKeyboardMarkup([
