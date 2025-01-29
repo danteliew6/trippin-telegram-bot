@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram import ParseMode
 from config import states
-from db_functions import update_user_uploads, get_trips_ref, user_initialised, get_selected_trip
+from db_functions import update_user_uploads, get_trips_ref, user_initialised, get_selected_trip, get_trips_info_ref
 
 # Telegram bot command handlers
 def start(update: Update, context: CallbackContext) -> None:
@@ -79,7 +79,7 @@ def trip_info_command(update: Update, context: CallbackContext):
     print('Getting trip summary....')
     user_id = str(update.message.from_user.id)
     formatted_msg = "This is the current summary of all the items added for your trip: \n\n"
-    trips_info_ref = get_trips_ref(user_id)
+    trips_info_ref = get_trips_info_ref(user_id)
     selected_trip = get_selected_trip(user_id)
     doc = trips_info_ref.get().to_dict()
     trips_info_dict = doc.get(selected_trip, {})

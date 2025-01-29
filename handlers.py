@@ -5,7 +5,7 @@ from config import db, TRAVEL_FILE_BUCKET_NAME, states
 from file_service import add_file_info_to_database, generate_summary_message, upload_to_gemini
 from gcs_utils import check_folder_exists
 from utils import generate_file_uuid, generate_trip_uuid
-from db_functions import get_selected_trip, get_trips_ref, get_upload_mode, update_selected_trip, update_user_uploads, initialise_trips, initialise_trip_information, get_trip_uuid
+from db_functions import get_selected_trip, get_trips_ref, get_upload_mode, update_selected_trip, update_user_uploads, initialise_trips, initialise_trip_information, get_trip_uuid, get_trips_info_ref
 from gcs_utils import upload_blob, delete_blob
     
 
@@ -184,7 +184,7 @@ def handle_get_item_info(update: Update, context: CallbackContext):
     if query:
         query.answer()
         user_id = str(query.from_user.id)
-        trips_ref = get_trips_ref(user_id)
+        trips_ref = get_trips_info_ref(user_id)
         selected_trip = get_selected_trip(user_id)
         query.edit_message_text(f"Let's get your trip item info!")
 
@@ -213,7 +213,7 @@ def handle_show_item_info(update: Update, context: CallbackContext):
         if query:
             query.answer()
             user_id = str(query.from_user.id)
-            trips_ref = get_trips_ref(user_id)
+            trips_ref = get_trips_info_ref(user_id)
             selected_trip = get_selected_trip(user_id)
             query.edit_message_text(f"✅ Item Selected")
             category, index = query.data.split(',')
