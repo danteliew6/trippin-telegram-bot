@@ -10,7 +10,7 @@ common_data = {
         "date_of_purchase": {"type": "string", "description": "The date of purchase. If not specified, use the current date."},
         "instructions": {"type": "string", "description": "Additional instructions or notes."},
     },
-    "required": ["item_name", "price", "date_of_purchase"]
+    "required": ["item_name", "price", "date_of_purchase", "currency"]
 }
 
 # Define the schema for 'category'
