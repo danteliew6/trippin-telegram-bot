@@ -132,10 +132,10 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("File uploaded.")
         # Send the file to Gemini API
         extracted_data = upload_to_gemini(get_blob_uri(uploaded_file), file_name)
+        print(extracted_data)
         if not extracted_data:
             raise Exception("Failed to process the file. Please try again.")
 
-        print(extracted_data)
         update.message.reply_text("File processed successfully! Adding data to the database...")
         # Append the extracted data to DB
         file_info = {
@@ -199,7 +199,7 @@ def handle_get_item_info(update: Update, context: CallbackContext):
         doc = trips_ref.get().to_dict()
         trip_items = doc.get(selected_trip, {})
         if not trip_items:
-            update.message.reply_text("You have no items added yet, please upload an item first.")
+            query.message.reply_text("You have no items added yet, please upload an item first.")
             return ConversationHandler.END
         
         reply_buttons = []
@@ -207,7 +207,7 @@ def handle_get_item_info(update: Update, context: CallbackContext):
             for index, item_info in enumerate(items):
                 reply_buttons.append([InlineKeyboardButton(f"({category}) {index}: {item_info['item_name']}", callback_data=f"{category},{index}")])
         reply_buttons.append([InlineKeyboardButton("Cancel", callback_data="cancel")])
-        update.message.reply_text("Please select the item.",
+        query.message.reply_text("Please select the item.",
                         reply_markup=InlineKeyboardMarkup(reply_buttons))
         return states['SHOW_ITEM_INFO']
     else:
@@ -228,7 +228,7 @@ def handle_show_item_info(update: Update, context: CallbackContext):
             doc = trips_ref.get().to_dict()
             trip_items = doc.get(selected_trip, {})
             item_info = trip_items[category][int(index)]
-            update.message.reply_text(str(item_info))
+            query.message.reply_text(str(item_info))
     except Exception as e:
         print(f'Error:{e}')
         update.message.reply_text("Unknown Error, please try again.")

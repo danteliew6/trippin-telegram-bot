@@ -64,6 +64,7 @@ def upload_to_gemini(file_path_uri: str, file_name: str) -> dict:
         print(f"Prompt Token Count: {usage_metadata.prompt_token_count}")
         print(f"Candidates Token Count: {usage_metadata.candidates_token_count}")
         print(f"Total Token Count: {usage_metadata.total_token_count}")
+        print(response)
         fc = response.candidates[0].content.parts[0].function_call
         return type(fc).to_dict(fc)
     except Exception as e:
