@@ -39,7 +39,7 @@ TRAVEL_FILE_BUCKET_NAME = os.environ.get("TRAVEL_FILE_BUCKET_NAME", "TRAVEL_FILE
 FOLDER_ID = os.environ.get("FOLDER_ID", "FOLDER_ID environment variable is not set.")
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "SPREADSHEET_ID environment variable is not set.")
 SHEET_NAME = os.environ.get("SHEET_NAME", "SHEET_NAME environment variable is not set.")
-vertexai.init(project=project_id)
+vertexai.init(project=project_id, service_account=os.environ.get("SERVICE_ACCOUNT", "SERVICE_ACCOUNT environment variable is not set."))
 
 
 # sheet = gc.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
