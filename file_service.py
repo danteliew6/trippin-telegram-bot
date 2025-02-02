@@ -2,7 +2,7 @@ from config import db
 from gemini_protos_schema import extract_travel_document_data
 from google.cloud import firestore
 from db_functions import get_trips_info_ref, get_selected_trip, get_upload_mode, get_trip_uuid
-from vertexai.generative_models import GenerativeModel, GenerationConfig, Part
+from vertexai.generative_models import GenerativeModel, GenerationConfig, Part, Tool
 
 # Upload file to Google Drive
 # def upload_to_google_drive(file_path: str, file_name: str) -> str:
@@ -38,7 +38,7 @@ def upload_to_gemini(file_path_uri: str, file_name: str) -> dict:
         else: 
             uploaded_file = Part.from_uri(uri=file_path_uri, mime_type=f"image/{mime_type}")
 
-        model = GenerativeModel("gemini-1.5-flash", tools=[extract_travel_document_data])
+        model = GenerativeModel("gemini-1.5-flash", tools=[Tool(function_declarations=extract_travel_document_data)])
 
         prompt = "Please extract the data from this document. \
              For any dates being extracted, ensure it follows the format DD-MM-YYYY. \
