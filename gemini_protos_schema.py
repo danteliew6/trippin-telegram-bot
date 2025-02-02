@@ -1,6 +1,6 @@
 import google.generativeai as genai
 import textwrap
-
+from vertexai.generative_models import FunctionDeclaration
 
 # Define the schema for 'common_data'
 common_data = genai.protos.Schema(
@@ -79,7 +79,7 @@ category_data = genai.protos.Schema(
 )
 
 # Define the FunctionDeclaration for 'extract_travel_document_data'
-extract_travel_document_data = genai.protos.FunctionDeclaration(
+extract_travel_document_data = FunctionDeclaration(
     name="extract_travel_document_data",
     description=textwrap.dedent("""\
         Extracts structured data from travel-related documents.
