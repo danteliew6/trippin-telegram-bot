@@ -53,7 +53,7 @@ def initialise_trip_information(user_id, trip_name):
     }
 
     # Create the document with the default schema
-    trip_info_ref.set(default_schema)
+    trip_info_ref.set(default_schema, merge=True)
 
 
 def user_initialised(user_id: str):
