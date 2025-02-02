@@ -38,7 +38,7 @@ def upload_to_gemini(file_path_uri: str, file_name: str) -> dict:
         else: 
             uploaded_file = Part.from_uri(uri=file_path_uri, mime_type=f"image/{mime_type}")
 
-        model = GenerativeModel("gemini-1.5-flash", tools=[Tool(function_declarations=extract_travel_document_data)])
+        model = GenerativeModel("gemini-1.5-flash", tools=[Tool(function_declarations=[extract_travel_document_data])])
 
         prompt = "Please extract the data from this document. \
              For any dates being extracted, ensure it follows the format DD-MM-YYYY. \
