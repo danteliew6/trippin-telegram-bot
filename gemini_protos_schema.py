@@ -1,6 +1,7 @@
 import google.generativeai as genai
 import textwrap
 
+
 # Define the schema for 'common_data'
 common_data = genai.protos.Schema(
     type=genai.protos.Type.OBJECT,

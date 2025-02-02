@@ -104,12 +104,12 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
         print(
             f"File {source_file_name} uploaded to {destination_blob_name}."
         )
-        return True
+        return blob
     except Exception as e:
         print(
             f"Error uploading file {source_file_name}: {e}"
         )
-        return False
+        return None
 
 def delete_blob(bucket_name: str, blob_name: str) -> bool:
     """
@@ -138,3 +138,6 @@ def delete_blob(bucket_name: str, blob_name: str) -> bool:
     except Exception as e:
         print(f"Error deleting blob '{blob_name}' from bucket '{bucket_name}': {e}")
         return False
+    
+def get_blob_uri(blob):
+    return 'gs://' + blob.id[:-(len(str(blob.generation)) + 1)]

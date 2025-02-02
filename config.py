@@ -6,7 +6,7 @@ from telegram import Bot
 import google
 from googleapiclient.discovery import build
 from google.cloud import firestore
-import google.generativeai as genai
+import vertexai
 
 load_dotenv()
 states = {
@@ -39,8 +39,8 @@ TRAVEL_FILE_BUCKET_NAME = os.environ.get("TRAVEL_FILE_BUCKET_NAME", "TRAVEL_FILE
 FOLDER_ID = os.environ.get("FOLDER_ID", "FOLDER_ID environment variable is not set.")
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "SPREADSHEET_ID environment variable is not set.")
 SHEET_NAME = os.environ.get("SHEET_NAME", "SHEET_NAME environment variable is not set.")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "GEMINI_API_KEY environment variable is not set.")
-genai.configure(api_key=GEMINI_API_KEY)
+vertexai.init(project=project_id)
+
 
 # sheet = gc.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
 

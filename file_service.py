@@ -1,7 +1,9 @@
-from config import db, genai
+from config import db
 from gemini_protos_schema import extract_travel_document_data
 from google.cloud import firestore
 from db_functions import get_trips_info_ref, get_selected_trip, get_upload_mode, get_trip_uuid
+from vertexai.generative_models import GenerativeModel, GenerationConfig, Part
+
 # Upload file to Google Drive
 # def upload_to_google_drive(file_path: str, file_name: str) -> str:
 #     file_metadata = {"name": file_name, "parents": [FOLDER_ID]}
@@ -28,17 +30,17 @@ from db_functions import get_trips_info_ref, get_selected_trip, get_upload_mode,
 #         return None
 
 # Upload file to Gemini API
-def upload_to_gemini(file_path: str, file_name: str) -> dict:
+def upload_to_gemini(file_path_uri: str, file_name: str) -> dict:
     try:
         mime_type = file_name.split('.')[-1].lower()
         if mime_type == 'pdf':
-            uploaded_file = genai.upload_file(path=file_path, display_name=file_name, mime_type="application/pdf")
+            uploaded_file = Part.from_uri(uri=file_path_uri, mime_type="application/pdf")
         else: 
-            uploaded_file = genai.upload_file(path=file_path, display_name=file_name, mime_type=f"image/{mime_type}")
+            uploaded_file = Part.from_uri(uri=file_path_uri, mime_type=f"image/{mime_type}")
 
-        model = genai.GenerativeModel("gemini-1.5-flash", tools=[extract_travel_document_data])
-        response = model.generate_content(
-            ["Please extract the data from this document. \
+        model = GenerativeModel("gemini-1.5-flash", tools=[extract_travel_document_data])
+
+        prompt = "Please extract the data from this document. \
              For any dates being extracted, ensure it follows the format DD-MM-YYYY. \
              For dates without year provided, use DD-MM only. \
              Purchase date should be blank if not specified.\
@@ -47,11 +49,21 @@ def upload_to_gemini(file_path: str, file_name: str) -> dict:
              Rentals item name must be in this format: <rental company name> - <rental pickup date>.\
              Flights item name must be in this format: <airline company name> - <departure airport> (<flight number>).\
              Transport item name must be in this format: <transport vehicle type> - <pickup location> at <datetime>\
-             ", uploaded_file],
-            tool_config={'function_calling_config':'ANY'},
-            generation_config=genai.GenerationConfig(temperature=0.1)
-        )
+             "
+        
+        tokens = model.count_tokens(prompt)
+        print(f"Prompt Token Count: {tokens.total_tokens}")
+        print(f"Prompt Character Count: {tokens.total_billable_characters}")
 
+        response = model.generate_content(
+            [uploaded_file, prompt],
+            tool_config={'function_calling_config':'ANY'},
+            generation_config=GenerationConfig(temperature=0.1)
+        )
+        usage_metadata = response.usage_metadata
+        print(f"Prompt Token Count: {usage_metadata.prompt_token_count}")
+        print(f"Candidates Token Count: {usage_metadata.candidates_token_count}")
+        print(f"Total Token Count: {usage_metadata.total_token_count}")
         fc = response.candidates[0].content.parts[0].function_call
         return type(fc).to_dict(fc)
     except Exception as e:

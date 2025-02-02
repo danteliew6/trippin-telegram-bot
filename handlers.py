@@ -6,7 +6,8 @@ from file_service import add_file_info_to_database, generate_summary_message, up
 from gcs_utils import check_folder_exists
 from utils import generate_file_uuid, generate_trip_uuid
 from db_functions import get_selected_trip, get_trips_ref, get_upload_mode, update_selected_trip, update_user_uploads, initialise_trips, initialise_trip_information, get_trip_uuid, get_trips_info_ref
-from gcs_utils import upload_blob, delete_blob
+from gcs_utils import upload_blob, delete_blob, get_blob_uri
+from commands import cancel
     
 
 def handle_trip_selection(update: Update, context: CallbackContext):
@@ -123,14 +124,14 @@ def handle_file_upload(update: Update, context: CallbackContext) -> None:
         trip_uuid = get_trip_uuid(user_id, selected_trip)
         
         destination_blob_name = f"{user_id}/{trip_uuid}/{local_file_path}"
-        is_uploaded = upload_blob(TRAVEL_FILE_BUCKET_NAME, local_file_path, destination_blob_name)
-
-        if not is_uploaded:
+        uploaded_file = upload_blob(TRAVEL_FILE_BUCKET_NAME, local_file_path, destination_blob_name)
+        
+        if not uploaded_file:
             raise Exception("Failed to upload file.")
         
         update.message.reply_text("File uploaded.")
         # Send the file to Gemini API
-        extracted_data = upload_to_gemini(local_file_path, file_name)
+        extracted_data = upload_to_gemini(get_blob_uri(uploaded_file), file_name)
         if not extracted_data:
             raise Exception("Failed to process the file. Please try again.")
 
@@ -177,7 +178,14 @@ def handle_trip_info_selection(update: Update, context: CallbackContext):
     query = update.callback_query
     if query:
         query.answer()
-        return states[query.data] 
+        if query.data == 'GET_ITEM_INFO':
+            return handle_get_item_info(update, context)
+        elif query.data == 'MODIFY_ITEM_INFO':
+            return handle_show_item_info(update, context)
+        else:
+            return cancel(update, context)
+    else:
+        return ConversationHandler.END 
     
 def handle_get_item_info(update: Update, context: CallbackContext):
     query = update.callback_query
